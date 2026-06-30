@@ -66,7 +66,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
     try {
       const token = localStorage.getItem('tt_token');
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/orders/${id}/receipt`,
+        `${import.meta.env.VITE_API_URL || '/api'}/orders/${id}/receipt`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error('Failed');
