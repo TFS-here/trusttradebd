@@ -17,6 +17,8 @@ import { orderApi } from './api/orderApi';
 // Auth
 const LoginPage    = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 
 // Buyer
 const HomePage       = lazy(() => import('./pages/buyer/HomePage'));
@@ -159,6 +161,8 @@ const App = () => (
           {/* ── Guest only ────────────────────────────────────── */}
           <Route path="/login"    element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+          <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
 
           {/* ── Public browsing ───────────────────────────────── */}
           <Route path="/"             element={<MainLayout><HomePage /></MainLayout>} />

@@ -70,7 +70,10 @@ const LoginPage = () => {
                 autoComplete="email" autoFocus />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-zinc-300">Password</label>
+                <Link to="/forgot-password" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">Forgot password?</Link>
+              </div>
               <input type="password" className="input" placeholder="••••••••"
                 value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                 autoComplete="current-password" />

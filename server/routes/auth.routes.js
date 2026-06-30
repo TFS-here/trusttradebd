@@ -8,6 +8,8 @@ const {
   logout,
   verifyEmail,
   resendOtp,
+  forgotPassword,
+  resetPassword,
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 
@@ -19,6 +21,8 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-otp', resendOtp);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:token', resetPassword);
 
 // ── Protected routes ──────────────────────────────────────────────
 router.use(protect); // All routes below require a valid JWT

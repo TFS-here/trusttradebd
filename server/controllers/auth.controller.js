@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User.model');
 const { generateToken } = require('../utils/generateToken');
-const { sendVerificationEmail } = require('../utils/sendEmail');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/sendEmail');
 const ApiError = require('../utils/apiError');
 const validator = require('validator');
 
@@ -451,4 +451,77 @@ const logout = (req, res) => {
   });
 };
 
-module.exports = { register, login, getMe, updateProfile, changePassword, logout, verifyEmail, resendOtp };
+/**
+ * POST /api/auth/forgot-password
+ * Public — send a password reset link to user email
+ */
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return next(ApiError.badRequest('Email is required.'));
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      // Don't leak whether the email exists, just return success
+      return res.status(200).json({ status: 'success', message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    // Generate token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+    await user.save({ validateBeforeSave: false });
+
+    // Send email
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    try {
+      await sendPasswordResetEmail(user.email, resetUrl, user.name);
+      return res.status(200).json({ status: 'success', message: 'Password reset link sent to email.' });
+    } catch (err) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return next(ApiError.internal('There was an error sending the email. Try again later.'));
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * POST /api/auth/reset-password/:token
+ * Public — reset password using token
+ */
+const resetPassword = async (req, res, next) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return next(ApiError.badRequest('Token is invalid or has expired.'));
+    }
+
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 8) {
+      return next(ApiError.badRequest('New password must be at least 8 characters.'));
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      return next(ApiError.badRequest('Password must contain uppercase, lowercase, and a number.'));
+    }
+
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({ status: 'success', message: 'Password reset successful.' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getMe, updateProfile, changePassword, logout, verifyEmail, resendOtp, forgotPassword, resetPassword };
