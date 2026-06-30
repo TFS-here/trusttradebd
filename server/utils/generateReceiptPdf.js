@@ -28,7 +28,7 @@ function fmtDate(iso) {
 
 function fmtMoney(amount) {
   try {
-    return `৳${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `BDT ${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   } catch (e) {
     return String(amount);
   }
