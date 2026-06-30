@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: #09090B;
+    color: #F4F4F5;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Subtle noise texture over base */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  :focus-visible {
+    outline: 2px solid #8B5CF6;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #09090B; }
+  ::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8B5CF6; }
+
+  /* Selection */
+  ::selection { background: rgba(139, 92, 246, 0.3); color: #F4F4F5; }
+}
+
+@layer components {
+
+  /* ── Cards ──────────────────────────────────────────────────── */
+  .card {
+    @apply bg-surface-1 border border-white/5 rounded-2xl shadow-card;
+  }
+
+  .card-glass {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5;
+    &:hover { border-color: rgba(139,92,246,0.2); }
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl
+           transition-all duration-200 active:scale-[0.97]
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-primary {
+    @apply btn px-5 py-2.5 text-sm text-white
+           bg-gradient-to-r from-violet-600 to-violet-500
+           hover:from-violet-500 hover:to-violet-400
+           hover:shadow-glow-violet;
+  }
+
+  .btn-secondary {
+    @apply btn px-5 py-2.5 text-sm text-zinc-300 hover:text-white;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    &:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(139,92,246,0.4);
+    }
+  }
+
+  .btn-ghost {
+    @apply btn px-4 py-2 text-sm text-zinc-400
+           hover:text-white hover:bg-white/5;
+  }
+
+  .btn-danger {
+    @apply btn px-5 py-2.5 text-sm text-white;
+    background: rgba(244,63,94,0.2);
+    border: 1px solid rgba(244,63,94,0.3);
+    &:hover {
+      background: rgba(244,63,94,0.3);
+      border-color: rgba(251,113,133,0.5);
+    }
+  }
+
+  .btn-emerald {
+    @apply btn px-5 py-2.5 text-sm text-emerald-400;
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.2);
+    &:hover {
+      background: rgba(52,211,153,0.2);
+      border-color: rgba(52,211,153,0.4);
+    }
+  }
+
+  /* ── Inputs ──────────────────────────────────────────────────── */
+  .input {
+    @apply w-full bg-surface-3 rounded-xl px-4 py-2.5 text-sm text-zinc-100
+           placeholder-zinc-600 transition-all duration-200
+           focus:outline-none focus:bg-surface-2;
+    border: 1px solid rgba(255,255,255,0.08);
+    &:focus {
+      border-color: rgba(139,92,246,0.6);
+      box-shadow: 0 0 0 2px rgba(139,92,246,0.2);
+    }
+  }
+
+  /* ── Badges ──────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1
+           rounded-full text-xs font-semibold;
+  }
+
+  .badge-violet  { @apply badge text-violet-400; background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.2); }
+  .badge-emerald { @apply badge text-emerald-400; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.2); }
+  .badge-amber   { @apply badge text-amber-400; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.2); }
+  .badge-rose    { @apply badge text-rose-400; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.2); }
+  .badge-zinc    { @apply badge text-zinc-400; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); }
+
+  /* ── Section label ───────────────────────────────────────────── */
+  .section-label {
+    @apply text-xs font-bold uppercase tracking-widest text-violet-400;
+  }
+
+  /* ── Glow divider ────────────────────────────────────────────── */
+  .glow-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent;
+  }
+
+  /* ── Skeleton loader ─────────────────────────────────────────── */
+  .skeleton {
+    @apply bg-gradient-to-r from-surface-2 via-surface-3 to-surface-2
+           bg-[length:200%_100%] animate-shimmer rounded-xl;
+  }
+}
+
+@layer utilities {
+  /* Glass effect */
+  .glass {
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, #A78BFA, #8B5CF6, #34D399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-violet {
+    background: linear-gradient(135deg, #C4B5FD, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Violet glow ring on focus */
+  .ring-glow {
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.2);
+  }
+
+  /* Animated border gradient */
+  .border-glow {
+    position: relative;
+  }
+  .border-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(139,92,246,0.5), rgba(52,211,153,0.3), rgba(139,92,246,0.5));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .border-glow:hover::before { opacity: 1; }
+}
