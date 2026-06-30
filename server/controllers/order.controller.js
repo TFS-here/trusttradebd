@@ -482,12 +482,11 @@ const cancelOrder = async (req, res, next) => {
 /**
  * GET /api/orders/:id/receipt
  * Buyer (own order) or Seller (own sale) — download PDF receipt.
- * Spawns the Python receipt generator and pipes output to client.
+ * Uses pdfkit to generate receipt.
  */
 const downloadReceipt = async (req, res, next) => {
   try {
-    const { spawn } = require('child_process');
-    const path = require('path');
+    const { generateReceiptPdf } = require('../utils/generateReceiptPdf');
 
     const order = await populateOrder(Order.findById(req.params.id));
     if (!order) return next(ApiError.notFound('Order'));
@@ -501,38 +500,19 @@ const downloadReceipt = async (req, res, next) => {
       return next(ApiError.forbidden('You do not have access to this receipt.'));
     }
 
-    // Serialise the populated order to JSON for Python
-    const orderJson = JSON.stringify({ order: order.toObject() });
+    try {
+      const pdfBuffer = await generateReceiptPdf(order.toObject());
 
-    const scriptPath = path.join(__dirname, '..', 'utils', 'generateReceipt.py');
-    const py = spawn('python', [scriptPath, orderJson]);
-
-    const chunks = [];
-    let stderr = '';
-
-    py.stdout.on('data', (chunk) => chunks.push(chunk));
-    py.stderr.on('data', (d)     => { stderr += d.toString(); });
-
-    py.on('close', (code) => {
-      if (code !== 0) {
-        console.error('Receipt generator error:', stderr);
-        return next(ApiError.internal('Failed to generate receipt. Please try again.'));
-      }
-
-      const pdfBuffer = Buffer.concat(chunks);
       const filename  = `TrustTrade-Receipt-${order._id.toString().slice(-8).toUpperCase()}.pdf`;
 
       res.setHeader('Content-Type',        'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length',      pdfBuffer.length);
       res.end(pdfBuffer);
-    });
-
-    py.on('error', (err) => {
-      console.error('Failed to spawn Python:', err.message);
-      next(ApiError.internal('PDF generation unavailable. Python3 may not be installed.'));
-    });
-
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      return next(ApiError.internal('Failed to generate receipt. Please try again.'));
+    }
   } catch (err) {
     next(err);
   }
