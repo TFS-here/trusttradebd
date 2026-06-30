@@ -86,6 +86,30 @@ const ProfilePage = () => {
     finally { setPwLoad(false); }
   };
 
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (data.status === 'success') {
+        const res = await api.put('/auth/update-profile', { avatar: data.data.url });
+        updateUser(res.data.data.user);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Avatar upload failed');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   const roleLabel = { buyer: 'Buyer', seller: 'Seller', admin: 'Admin' };
 
   return (
@@ -97,14 +121,19 @@ const ProfilePage = () => {
 
       {/* Avatar + role card */}
       <div className="card rounded-2xl p-6 flex items-center gap-5">
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 group">
           <div className="absolute inset-0 bg-violet-500/30 rounded-full blur-md" />
           <img
             src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name||'U')}&background=7C3AED&color=fff&size=80`}
             alt={user?.name}
-            className="relative w-20 h-20 rounded-full object-cover ring-2 ring-violet-500/40"
+            className={`relative w-20 h-20 rounded-full object-cover ring-2 ring-violet-500/40 transition-opacity ${avatarUploading ? 'opacity-50' : ''}`}
           />
           <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 rounded-full border-2 border-surface-1" />
+          
+          <label className="absolute inset-0 flex items-center justify-center bg-black/60 text-white opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-opacity z-10 text-xs font-medium">
+            {avatarUploading ? '...' : 'Upload'}
+            <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} disabled={avatarUploading} />
+          </label>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-lg font-bold text-zinc-100 truncate">{user?.name}</p>
