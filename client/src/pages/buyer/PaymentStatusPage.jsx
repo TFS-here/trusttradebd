@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Confetti from 'react-confetti'; // We can just use an animated element or basic HTML since react-confetti might not be installed, let's use framer-motion instead
 
 const PaymentStatusPage = () => {
   const location = useLocation();
