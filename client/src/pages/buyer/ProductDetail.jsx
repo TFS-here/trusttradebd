@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProduct } from '../../hooks/useProduct';
+import { productApi } from '../../api/productApi';
 import StockBadge from '../../components/product/StockBadge';
 import ProductCard from '../../components/product/ProductCard';
 import ReviewSection from '../../components/review/ReviewSection';
@@ -11,8 +13,24 @@ import WriteReview from '../../components/review/WriteReview';
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { product, related, loading, error } = useProduct(id);
   const { addItem } = useCart();
+  const { user } = useAuth();
+  
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteProduct = async () => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    setDeleting(true);
+    try {
+      await productApi.remove(id);
+      navigate('/');
+    } catch (err) {
+      alert("Failed to delete product: " + (err.response?.data?.message || err.message));
+      setDeleting(false);
+    }
+  };
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity]           = useState(1);
@@ -99,7 +117,15 @@ const ProductDetail = () => {
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-3">
               <h1 className="text-2xl font-bold text-zinc-100 leading-snug">{title}</h1>
-              <StockBadge stock={stock} showCount size="sm" />
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <StockBadge stock={stock} showCount size="sm" />
+                {user?.role === 'admin' && (
+                  <button onClick={handleDeleteProduct} disabled={deleting}
+                    className="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition">
+                    {deleting ? 'Deleting...' : 'Delete Product'}
+                  </button>
+                )}
+              </div>
             </div>
             {reviewCount > 0 && (
               <div className="flex items-center gap-2">
