@@ -32,6 +32,7 @@ const SellerProducts    = lazy(() => import('./pages/seller/SellerProducts'));
 const SellerOrders      = lazy(() => import('./pages/seller/SellerOrders'));
 const SellerReviewsPage  = lazy(() => import('./pages/seller/SellerReviewsPage'));
 const CreateProductPage  = lazy(() => import('./pages/seller/CreateProductPage'));
+const EditProductPage    = lazy(() => import('./pages/seller/EditProductPage'));
 
 // Admin
 const AdminLogin     = lazy(() => import('./pages/admin/AdminLogin'));
@@ -197,6 +198,9 @@ const App = () => (
           } />
           <Route path="/seller/products/new" element={
             <RoleRoute roles={['seller']}><MainLayout><CreateProductPage /></MainLayout></RoleRoute>
+          } />
+          <Route path="/seller/products/:id/edit" element={
+            <RoleRoute roles={['seller']}><MainLayout><EditProductPage /></MainLayout></RoleRoute>
           } />
           <Route path="/seller/orders" element={
             <RoleRoute roles={['seller']}><MainLayout><SellerOrders /></MainLayout></RoleRoute>
