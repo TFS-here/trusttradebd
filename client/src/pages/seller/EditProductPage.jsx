@@ -28,18 +28,47 @@ const FormField = ({ label, error, required, hint, children }) => (
   </div>
 );
 
-const ImageInput = ({ index, value, onChange, onRemove }) => (
-  <div className="flex gap-2">
-    <input type="url" value={value} onChange={e => onChange(index, e.target.value)}
-      placeholder={`Image URL ${index + 1}`} className="input flex-1" />
-    {index > 0 && (
-      <button type="button" onClick={() => onRemove(index)}
-        className="px-3 py-2 rounded-xl border border-white/8 text-zinc-600 hover:border-rose-500/30 hover:text-rose-400 transition shrink-0">
-        ✕
-      </button>
-    )}
-  </div>
-);
+const ImageInput = ({ index, value, onChange, onRemove }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const { data } = await productApi.uploadImage(formData);
+      if (data.status === 'success') {
+        onChange(index, data.data.url);
+      }
+    } catch (err) {
+      console.error('Image upload failed', err);
+      alert('Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex gap-2 items-center">
+      <input type="url" value={value} onChange={e => onChange(index, e.target.value)}
+        placeholder={`Image URL ${index + 1}`} className="input flex-1" />
+      <label className="cursor-pointer px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition shrink-0 text-sm font-medium flex items-center justify-center">
+        {uploading ? '...' : 'Upload'}
+        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={uploading} />
+      </label>
+      {index > 0 && (
+        <button type="button" onClick={() => onRemove(index)}
+          className="px-3 py-2 rounded-xl border border-white/8 text-zinc-600 hover:border-rose-500/30 hover:text-rose-400 transition shrink-0">
+          ✕
+        </button>
+      )}
+    </div>
+  );
+};
 
 const EditProductPage = () => {
   const { id } = useParams();

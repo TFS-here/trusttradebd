@@ -57,4 +57,12 @@ export const productApi = {
    */
   remove: (id) =>
     api.delete(`/products/${id}`),
+
+  /**
+   * POST /upload — upload an image to Cloudinary
+   */
+  uploadImage: (formData) =>
+    api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };

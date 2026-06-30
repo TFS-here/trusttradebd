@@ -19,6 +19,8 @@ const walletRoutes  = require('./routes/wallet.routes');
 const reviewRoutes  = require('./routes/review.routes');
 const adminRoutes   = require('./routes/admin.routes');
 const qaRoutes      = require('./routes/qa.routes');
+const uploadRoutes  = require('./routes/upload.routes');
+
 
 const app = express();
 
@@ -93,6 +95,7 @@ app.use('/api/wallet',   walletRoutes);
 app.use('/api/reviews',  reviewRoutes);
 app.use('/api/admin',    adminRoutes);
 app.use('/api/qa',       qaRoutes);
+app.use('/api/upload',   uploadRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────
 app.all('*', (req, res, next) => {
