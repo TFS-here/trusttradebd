@@ -22,7 +22,7 @@ router.post('/login', login);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-otp', resendOtp);
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
+router.post('/reset-password', resetPassword);
 
 // ── Protected routes ──────────────────────────────────────────────
 router.use(protect); // All routes below require a valid JWT

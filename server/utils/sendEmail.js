@@ -94,7 +94,7 @@ const buildOtpHtml = (otp, name) => `
 </html>
 `;
 
-const buildResetPasswordHtml = (url, name) => `
+const buildResetPasswordHtml = (otp, name) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,12 +123,13 @@ const buildResetPasswordHtml = (url, name) => `
               <h2 style="margin:0 0 8px;color:#f4f4f8;font-size:22px;font-weight:700;">Reset your password</h2>
               <p style="margin:0 0 28px;color:#9ca3af;font-size:15px;line-height:1.6;">
                 Hi <strong style="color:#e5e7eb;">${name}</strong>,<br/>
-                We received a request to reset the password for your TrustTrade BD account. Click the button below to choose a new password. This link expires in <strong style="color:#a78bfa;">15 minutes</strong>.
+                We received a request to reset the password for your TrustTrade BD account. Use the OTP below to verify your request. This code expires in <strong style="color:#a78bfa;">15 minutes</strong>.
               </p>
 
-              <!-- Reset Button -->
-              <div style="text-align:center;margin-bottom:28px;">
-                <a href="${url}" style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;">Reset Password</a>
+              <!-- OTP Box -->
+              <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.3);border-radius:16px;padding:28px;text-align:center;margin-bottom:28px;">
+                <p style="margin:0 0 8px;color:#9ca3af;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Your reset code</p>
+                <div style="font-size:44px;font-weight:800;letter-spacing:12px;color:#a78bfa;font-family:'Courier New',monospace;">${otp}</div>
               </div>
 
               <p style="margin:0 0 8px;color:#6b7280;font-size:13px;">Didn't request this? You can safely ignore this email and your password will remain unchanged.</p>
@@ -177,18 +178,18 @@ const sendVerificationEmail = async (to, otp, name = 'there') => {
 /**
  * Sends a password reset email.
  * @param {string} to      - Recipient email address
- * @param {string} url     - Password reset URL
+ * @param {string} otp     - Password reset OTP
  * @param {string} name    - Recipient's display name
  */
-const sendPasswordResetEmail = async (to, url, name = 'there') => {
+const sendPasswordResetEmail = async (to, otp, name = 'there') => {
   const transporter = await createTransporter();
 
   const info = await transporter.sendMail({
     from: `"TrustTrade BD" <${process.env.EMAIL_USER || 'noreply@trusttradebd.com'}>`,
     to,
     subject: 'Reset your TrustTrade BD password',
-    text: `Hi ${name},\n\nWe received a request to reset your password. Click the link below to reset it:\n\n${url}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, you can safely ignore this email.`,
-    html: buildResetPasswordHtml(url, name),
+    text: `Hi ${name},\n\nWe received a request to reset your password. Your reset code is:\n\n${otp}\n\nThis code expires in 15 minutes.\n\nIf you didn't request this, you can safely ignore this email.`,
+    html: buildResetPasswordHtml(otp, name),
   });
 
   // In development (Ethereal) — print the preview URL

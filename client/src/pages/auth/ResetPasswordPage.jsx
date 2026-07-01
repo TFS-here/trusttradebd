@@ -1,13 +1,19 @@
 import { useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../context/AuthContext';
 
 const ResetPasswordPage = () => {
-  const { token } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [form, setForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [form, setForm] = useState({ 
+    email: location.state?.email || '', 
+    otp: '', 
+    newPassword: '', 
+    confirmPassword: '' 
+  });
+  
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,6 +21,11 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!form.email || !form.otp) {
+      setError('Email and reset code are required.');
+      return;
+    }
     
     if (form.newPassword.length < 8) {
       setError('Password must be at least 8 characters.');
@@ -33,11 +44,15 @@ const ResetPasswordPage = () => {
     setSuccess('');
     
     try {
-      const { data } = await api.post(`/auth/reset-password/${token}`, { newPassword: form.newPassword });
+      const { data } = await api.post(`/auth/reset-password`, { 
+        email: form.email, 
+        otp: form.otp, 
+        newPassword: form.newPassword 
+      });
       setSuccess(data.message);
       setTimeout(() => navigate('/login'), 2500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Token is invalid or has expired.');
+      setError(err.response?.data?.message || 'Invalid or expired reset code.');
     } finally {
       setLoading(false);
     }
@@ -53,13 +68,35 @@ const ResetPasswordPage = () => {
             </div>
           </Link>
           <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Choose New Password</h1>
-          <p className="text-zinc-400">Enter a strong password for your account.</p>
+          <p className="text-zinc-400">Enter your 6-digit code and new password.</p>
         </div>
 
         <div className="card p-8 rounded-3xl relative overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-violet-500 to-emerald-400" />
           
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">Email address</label>
+              <input 
+                type="email" 
+                value={form.email} 
+                onChange={e => setForm({ ...form, email: e.target.value })}
+                className={`input ${error ? 'border-rose-500/50 focus:ring-rose-500/20' : ''}`}
+                placeholder="you@example.com"
+                readOnly={!!location.state?.email}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">6-Digit Reset Code</label>
+              <input 
+                type="text" 
+                value={form.otp} 
+                onChange={e => setForm({ ...form, otp: e.target.value })}
+                className={`input font-mono tracking-widest ${error ? 'border-rose-500/50 focus:ring-rose-500/20' : ''}`}
+                placeholder="123456"
+                maxLength="6"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-zinc-300 mb-1.5">New password</label>
               <input 
@@ -96,7 +133,7 @@ const ResetPasswordPage = () => {
               )}
             </AnimatePresence>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
+            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 mt-2">
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
