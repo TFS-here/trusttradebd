@@ -5,6 +5,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProduct } from '../../hooks/useProduct';
 import { productApi } from '../../api/productApi';
+import { adminApi } from '../../api/adminApi';
 import StockBadge from '../../components/product/StockBadge';
 import ProductCard from '../../components/product/ProductCard';
 import ReviewSection from '../../components/review/ReviewSection';
@@ -19,6 +20,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
   
   const [deleting, setDeleting] = useState(false);
+  const [banning, setBanning] = useState(false);
 
   const handleDeleteProduct = async () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -29,6 +31,31 @@ const ProductDetail = () => {
     } catch (err) {
       alert("Failed to delete product: " + (err.response?.data?.message || err.message));
       setDeleting(false);
+    }
+  };
+
+  const handleToggleBan = async () => {
+    if (product.isBanned) {
+      if (!window.confirm("Are you sure you want to unban this product?")) return;
+      setBanning(true);
+      try {
+        await adminApi.unbanProduct(id);
+        window.location.reload();
+      } catch (err) {
+        alert("Failed to unban product: " + (err.response?.data?.message || err.message));
+        setBanning(false);
+      }
+    } else {
+      const reason = window.prompt("Enter reason for banning this product:");
+      if (!reason) return;
+      setBanning(true);
+      try {
+        await adminApi.banProduct(id, reason);
+        window.location.reload();
+      } catch (err) {
+        alert("Failed to ban product: " + (err.response?.data?.message || err.message));
+        setBanning(false);
+      }
     }
   };
 
@@ -120,10 +147,16 @@ const ProductDetail = () => {
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <StockBadge stock={stock} showCount size="sm" />
                 {user?.role === 'admin' && (
-                  <button onClick={handleDeleteProduct} disabled={deleting}
-                    className="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition">
-                    {deleting ? 'Deleting...' : 'Delete Product'}
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={handleToggleBan} disabled={banning}
+                      className="text-xs px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition">
+                      {banning ? 'Processing...' : (product.isBanned ? 'Unban Product' : 'Ban Product')}
+                    </button>
+                    <button onClick={handleDeleteProduct} disabled={deleting}
+                      className="text-xs px-2 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition">
+                      {deleting ? 'Deleting...' : 'Delete Product'}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
