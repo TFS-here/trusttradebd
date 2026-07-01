@@ -86,7 +86,7 @@ const UserMenu = ({ user, onLogout }) => {
 
   const menuItems = {
     buyer:  [{ label: 'My Orders', to: '/orders' }, { label: 'Wallet', to: '/wallet' }, { label: 'Profile', to: '/profile' }],
-    seller: [{ label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }, { label: 'Reviews & Q&A', to: '/seller/reviews' }, { label: 'Wallet', to: '/wallet' }, { label: 'Profile', to: '/profile' }],
+    seller: [{ label: 'Dashboard', to: '/seller/dashboard' }, { label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }, { label: 'Reviews & Q&A', to: '/seller/reviews' }, { label: 'Wallet', to: '/wallet' }, { label: 'Profile', to: '/profile' }],
     admin:  [{ label: 'Dashboard', to: '/admin/dashboard' }],
   };
 
