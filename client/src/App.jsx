@@ -31,6 +31,7 @@ const PaymentStatusPage = lazy(() => import('./pages/buyer/PaymentStatusPage'));
 
 // Seller
 const SellerProducts    = lazy(() => import('./pages/seller/SellerProducts'));
+const SellerAnalytics   = lazy(() => import('./pages/seller/SellerAnalytics'));
 const SellerOrders      = lazy(() => import('./pages/seller/SellerOrders'));
 const SellerReviewsPage  = lazy(() => import('./pages/seller/SellerReviewsPage'));
 const CreateProductPage  = lazy(() => import('./pages/seller/CreateProductPage'));
@@ -197,7 +198,9 @@ const App = () => (
           } />
 
           {/* ── Seller ────────────────────────────────────────── */}
-          <Route path="/seller/dashboard" element={<Navigate to="/seller/products" replace />} />
+          <Route path="/seller/dashboard" element={
+            <RoleRoute roles={['seller']}><MainLayout><SellerAnalytics /></MainLayout></RoleRoute>
+          } />
           <Route path="/seller/products"  element={
             <RoleRoute roles={['seller']}><MainLayout><SellerProducts /></MainLayout></RoleRoute>
           } />

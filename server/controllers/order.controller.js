@@ -280,6 +280,61 @@ const getOrders = async (req, res, next) => {
 };
 
 /**
+ * GET /api/orders/seller/analytics
+ * Seller only — aggregate analytics for dashboard.
+ */
+const getSellerAnalytics = async (req, res, next) => {
+  try {
+    const sellerId = req.user._id;
+
+    // We can run an aggregation pipeline to get everything in one pass,
+    // or just run a few queries. Aggregation is cleaner.
+    const stats = await Order.aggregate([
+      { $match: { seller: sellerId } },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          completedOrders: {
+            $sum: { $cond: [{ $eq: ['$escrowStatus', 'RELEASED'] }, 1, 0] }
+          },
+          pendingOrders: {
+            $sum: { $cond: [{ $in: ['$escrowStatus', ['LOCKED', 'SHIPPED', 'ON_HOLD']] }, 1, 0] }
+          },
+          totalRevenue: {
+            $sum: { $cond: [{ $eq: ['$escrowStatus', 'RELEASED'] }, '$sellerReceives', 0] }
+          }
+        }
+      }
+    ]);
+
+    const analytics = stats[0] || {
+      totalOrders: 0,
+      completedOrders: 0,
+      pendingOrders: 0,
+      totalRevenue: 0
+    };
+
+    // Get 5 recent orders for the dashboard
+    const recentOrders = await Order.find({ seller: sellerId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('buyer', 'name email avatar')
+      .populate('items.product', 'title images');
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        analytics,
+        recentOrders,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * GET /api/orders/:id
  * Buyer (own order), Seller (own sale), or Admin.
  */
@@ -521,6 +576,7 @@ const downloadReceipt = async (req, res, next) => {
 module.exports = {
   placeOrder,
   getOrders,
+  getSellerAnalytics,
   getOrder,
   markShipped,
   confirmDelivery,

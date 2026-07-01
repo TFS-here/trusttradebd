@@ -2,6 +2,7 @@ const express = require('express');
 const {
   placeOrder,
   getOrders,
+  getSellerAnalytics,
   getOrder,
   markShipped,
   confirmDelivery,
@@ -18,6 +19,7 @@ router.use(protect);
 
 // ── Buyer + Seller (shared) ───────────────────────────────────────
 router.get('/',              getOrders);
+router.get('/seller/analytics', roleGuard('seller'), getSellerAnalytics);
 router.get('/:id',           getOrder);
 router.get('/:id/receipt',   downloadReceipt);   // PDF download
 

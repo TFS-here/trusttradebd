@@ -15,6 +15,7 @@ api.interceptors.request.use((config) => {
 export const orderApi = {
   place: (data)        => api.post('/orders', data),
   getAll: (params)     => api.get('/orders', { params }),
+  getSellerAnalytics: ()=> api.get('/orders/seller/analytics'),
   getById: (id)        => api.get(`/orders/${id}`),
   ship: (id, data)     => api.patch(`/orders/${id}/ship`, data),
   confirmDelivery: (id)=> api.patch(`/orders/${id}/confirm-delivery`),
