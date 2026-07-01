@@ -33,6 +33,7 @@ export const adminApi = {
   // Users
   getUsers: (params)           => api.get('/admin/users', { params }),
   getUser: (id)                => api.get(`/admin/users/${id}`),
+  getUserProducts: (id)        => api.get(`/admin/users/${id}/products`),
   blockUser: (id, reason)      => api.patch(`/admin/users/${id}/block`, { reason }),
   unblockUser: (id)            => api.patch(`/admin/users/${id}/unblock`),
   changeRole: (id, role)       => api.patch(`/admin/users/${id}/role`, { role }),

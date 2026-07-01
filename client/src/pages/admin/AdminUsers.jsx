@@ -172,6 +172,12 @@ const AdminUsers = () => {
                       Block
                     </button>
                   )}
+                  {user.role === 'seller' && (
+                    <Link to={`/admin/users/${user._id}/products`}
+                      className="text-xs px-3 py-1.5 rounded-lg bg-surface-2 border border-white/8 text-zinc-400 hover:border-violet-500/30 hover:text-violet-400 transition font-medium">
+                      Products
+                    </Link>
+                  )}
                   <Link to={`/admin/users/${user._id}`}
                     className="text-xs px-3 py-1.5 rounded-lg bg-surface-2 border border-white/8 text-zinc-400 hover:border-violet-500/30 hover:text-violet-400 transition font-medium">
                     View

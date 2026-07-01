@@ -293,6 +293,27 @@ const getUser = async (req, res, next) => {
 };
 
 /**
+ * GET /api/admin/users/:id/products
+ * Get all products of a seller (including banned and inactive).
+ */
+const getUserProducts = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return next(ApiError.notFound('User'));
+    if (user.role !== 'seller') return next(ApiError.badRequest('User is not a seller'));
+
+    const products = await Product.find({ seller: user._id }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      status: 'success',
+      data: { products },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * PATCH /api/admin/users/:id/block
  * Block a user with a mandatory reason.
  * Blocked users cannot log in or make any authenticated request.
@@ -691,6 +712,7 @@ module.exports = {
   getDashboard,
   getUsers,
   getUser,
+  getUserProducts,
   blockUser,
   unblockUser,
   changeUserRole,

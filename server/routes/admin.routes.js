@@ -4,6 +4,7 @@ const {
   getDashboard,
   getUsers,
   getUser,
+  getUserProducts,
   blockUser,
   unblockUser,
   changeUserRole,
@@ -36,6 +37,7 @@ router.get('/dashboard', getDashboard);
 // ── User management ───────────────────────────────────────────────
 router.get('/users',                getUsers);
 router.get('/users/:id',            getUser);
+router.get('/users/:id/products',   getUserProducts);
 router.patch('/users/:id/block',    blockUser);
 router.patch('/users/:id/unblock',  unblockUser);
 router.patch('/users/:id/role',     changeUserRole);
