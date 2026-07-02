@@ -6,6 +6,9 @@ const { roleGuard } = require('../middleware/role.middleware');
 
 router.use(protect);
 
+// Admin only route to get all disputes
+router.get('/', roleGuard('admin'), disputeController.getAllDisputes);
+
 // Admin only route to resolve a dispute in buyer's favor
 router.post(
   '/:disputeId/resolve-buyer-favor',

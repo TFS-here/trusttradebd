@@ -5,6 +5,27 @@ const Transaction = require('../models/Transaction.model');
 const ApiError = require('../utils/apiError');
 
 /**
+ * Get all disputes (Admin only)
+ */
+exports.getAllDisputes = async (req, res, next) => {
+  try {
+    const disputes = await Dispute.find()
+      .populate('order', 'totalAmount escrowStatus')
+      .populate('buyer', 'name email')
+      .populate('seller', 'name email')
+      .sort('-createdAt');
+
+    res.status(200).json({
+      status: 'success',
+      results: disputes.length,
+      data: disputes
+    });
+  } catch (error) {
+    next(new ApiError(error.message, 500));
+  }
+};
+
+/**
  * resolveDisputeInBuyerFavor
  * ─────────────────────────────────────────────────────────────────
  * Handles an admin ruling where a buyer proves a seller sent an incorrect/fraudulent item.
