@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { orderApi } from '../../api/orderApi';
 import EscrowTracker from '../../components/product/EscrowTracker';
 import WriteReview from '../../components/review/WriteReview';
+import OrderChat from '../../components/chat/OrderChat';
 
 const ConfirmDialog = ({ title, message, onConfirm, onCancel, loading, danger = false }) => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -287,6 +288,9 @@ const OrderDetail = ({ role = 'buyer' }) => {
             onCancel={() => setDialog(null)} loading={actionLoading} />
         )}
       </AnimatePresence>
+
+      {/* ── P2P Secure Chat ──────────────────────────────────── */}
+      <OrderChat orderId={id} />
     </div>
   );
 };

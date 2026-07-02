@@ -50,4 +50,9 @@ export const adminApi = {
 
   // Reviews
   hideReview: (id, reason)     => api.patch(`/admin/reviews/${id}/hide`, { reason }),
+
+  // Disputes
+  getDisputes: (params)        => api.get('/admin/disputes', { params }),
+  resolveDisputeBuyerFavor: (disputeId, data) =>
+    api.post(`/disputes/${disputeId}/resolve-buyer-favor`, data),
 };
