@@ -94,6 +94,26 @@ const releaseFunds = async (session, { buyerId, sellerId, amount, orderId, initi
     description: `Payment received for order #${orderId} (after ${PLATFORM_FEE_PERCENT}% fee)`,
   });
 
+  // Step 3: Record platform fee for analytics (no wallet mutation)
+  if (platformFee > 0) {
+    await Transaction.create(
+      [
+        {
+          user: sellerId,
+          type: 'FEE',
+          amount: platformFee,
+          balanceBefore: sellerTx.balanceAfter,
+          balanceAfter: sellerTx.balanceAfter,
+          description: `Platform fee deducted for order #${orderId}`,
+          order: orderId,
+          initiatedBy,
+          status: 'COMPLETED',
+        },
+      ],
+      { session }
+    );
+  }
+
   return { sellerTx, sellerReceives, platformFee };
 };
 
