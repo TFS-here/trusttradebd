@@ -61,6 +61,10 @@ class PathaoService {
 
     // Mapping TrustTrade Order to Pathao Payload
     // Defaulting missing fields to sensible values for Sandbox testing
+    // Ensure address is at least 10 characters for Pathao validation
+    const rawAddress = order.shippingAddress.address || 'Dhaka';
+    const safeAddress = rawAddress.length < 10 ? rawAddress.padEnd(10, '.') : rawAddress;
+
     const payload = {
       store_id: parseInt(this.storeId),
       merchant_order_id: order._id.toString(),
@@ -68,7 +72,7 @@ class PathaoService {
       sender_phone: seller.phone || '01711111111',
       recipient_name: order.shippingAddress.fullName || 'Customer',
       recipient_phone: order.shippingAddress.phone || '01811111111',
-      recipient_address: order.shippingAddress.address || 'Dhaka',
+      recipient_address: safeAddress,
       recipient_city: 1, // Defaulting to Dhaka city ID for Pathao
       recipient_zone: 1, // Defaulting to a specific zone ID
       recipient_area: 1, // Defaulting to a specific area ID
@@ -99,8 +103,19 @@ class PathaoService {
       return consignmentId;
     } catch (error) {
       console.error('Pathao Create Order Error:', error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Failed to create Pathao consignment';
-      throw new ApiError(message, 500);
+      
+      let message = 'Failed to create Pathao consignment';
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.errors) {
+          // Extract specific validation errors
+          const errorDetails = Object.values(data.errors).flat().join(', ');
+          message = `Pathao Validation: ${errorDetails}`;
+        } else if (data.message) {
+          message = data.message;
+        }
+      }
+      throw new ApiError(message, 400);
     }
   }
 }
