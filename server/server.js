@@ -21,12 +21,19 @@ const adminRoutes   = require('./routes/admin.routes');
 const qaRoutes      = require('./routes/qa.routes');
 const uploadRoutes  = require('./routes/upload.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const disputeRoutes = require('./routes/dispute.routes');
 
+
+const chatRoutes = require('./routes/chat.routes');
+const courierEscrowRoutes = require('./routes/courierEscrow.routes');
 
 const app = express();
 
 // ── Connect to Database ───────────────────────────────────────────
 connectDB();
+
+// ── Start Cron Jobs ───────────────────────────────────────────────
+startEscrowCronJob();
 
 // ── Security headers ──────────────────────────────────────────────
 app.use(helmet());
@@ -98,6 +105,9 @@ app.use('/api/admin',    adminRoutes);
 app.use('/api/qa',       qaRoutes);
 app.use('/api/upload',   uploadRoutes);
 app.use('/api/payment',  paymentRoutes);
+app.use('/api/disputes', disputeRoutes);
+app.use('/api/v1/shipping', courierEscrowRoutes);
+app.use('/api/chat',     chatRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────
 app.all('*', (req, res, next) => {

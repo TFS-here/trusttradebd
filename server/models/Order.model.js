@@ -172,6 +172,7 @@ const orderSchema = new mongoose.Schema(
     deliveredAt: Date,
     releasedAt: Date,
     refundedAt: Date,
+    escrowReleaseDate: Date, // Scheduled date for automatic fund release (e.g. 72 hours after delivery)
 
     // ── Dispute ───────────────────────────────────────────────────
     disputeNote: {
