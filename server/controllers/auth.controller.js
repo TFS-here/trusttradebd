@@ -286,7 +286,7 @@ const login = async (req, res, next) => {
       return next(ApiError.unauthorized('Invalid email or password.'));
     }
 
-    if (!user.isVerified) {
+    if (!user.isVerified && user.role !== 'admin') {
       return next(
         ApiError.forbidden(
           'Email not verified. Please verify your email before logging in.'
