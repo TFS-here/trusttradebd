@@ -500,8 +500,7 @@ const cancelOrder = async (req, res, next) => {
       );
     }
 
-    // Transition: LOCKED → ON_HOLD → REFUNDED
-    order.transitionEscrow('ON_HOLD', req.user, 'Buyer cancelled before shipment.');
+    // Transition: LOCKED → REFUNDED
     order.transitionEscrow('REFUNDED', req.user, 'Full refund issued — order cancelled before shipment.');
 
     // Refund buyer
