@@ -32,9 +32,6 @@ const app = express();
 // ── Connect to Database ───────────────────────────────────────────
 connectDB();
 
-// ── Start Cron Jobs ───────────────────────────────────────────────
-startEscrowCronJob();
-
 // ── Security headers ──────────────────────────────────────────────
 app.use(helmet());
 
