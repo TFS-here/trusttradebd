@@ -12,6 +12,17 @@ const ApiError = require('../utils/apiError');
  */
 exports.pathaoWebhook = async (req, res, next) => {
   try {
+    // ── Verify Webhook Secret ─────────────────────────────────────
+    // Pathao sends the secret in the Authorization header or x-pathao-secret header
+    const secret = req.headers['x-pathao-secret'] || req.headers['authorization'];
+    const expectedSecret = process.env.PATHAO_WEBHOOK_SECRET;
+
+    if (expectedSecret && secret !== expectedSecret) {
+      console.warn('⚠️ Pathao webhook received with invalid secret.');
+      // Still return 200 to prevent Pathao from retrying, but do nothing
+      return res.status(200).json({ received: true });
+    }
+
     // Typical Pathao webhook payload might contain consignment_id, order_id, status
     const { consignment_id, order_id, status } = req.body;
 
@@ -32,6 +43,7 @@ exports.pathaoWebhook = async (req, res, next) => {
         order.transitionEscrow('DELIVERED', systemActor, 'Pathao Webhook: Item Delivered.');
         order.escrowReleaseDate = releaseDate;
         await order.save();
+        console.log(`✅ Order ${order._id} marked DELIVERED via Pathao webhook. Escrow releases at ${releaseDate}`);
       }
     }
 
