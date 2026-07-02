@@ -16,17 +16,36 @@ const OrderChat = ({ orderId }) => {
   const scrollRef = useRef(null);
   const lastCountRef = useRef(0);
 
+  // ── Browser Notifications Permission ─────────────────────────
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
   // ── Fetch Messages ─────────────────────────────────────────────
   const fetchMessages = useCallback(async () => {
     try {
       const { data } = await chatApi.getMessages(orderId);
       const msgs = data.data || [];
-      setMessages(msgs);
-
-      // Track unread when chat is closed
+      
+      // Check for new messages when chat is closed
       if (!isOpen && msgs.length > lastCountRef.current) {
-        setUnread(msgs.length - lastCountRef.current);
+        const newCount = msgs.length - lastCountRef.current;
+        setUnread(newCount);
+        
+        // Trigger browser notification
+        if ('Notification' in window && Notification.permission === 'granted' && newCount > 0) {
+          const latestMsg = msgs[msgs.length - 1];
+          const notifText = latestMsg.text || 'Sent an image';
+          new Notification('New message in TrustTrade', {
+            body: notifText,
+            icon: '/favicon.ico' // Or any suitable icon
+          });
+        }
       }
+      
+      setMessages(msgs);
     } catch {
       // Silent fail on polling
     }
@@ -55,19 +74,49 @@ const OrderChat = ({ orderId }) => {
   }, [isOpen, messages.length]);
 
   // ── Send Message ───────────────────────────────────────────────
+  const [imageFile, setImageFile] = useState(null);
+  const fileInputRef = useRef(null);
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim() || sending) return;
+    if ((!text.trim() && !imageFile) || sending) return;
 
     setSending(true);
     setError('');
 
     try {
-      await chatApi.sendMessage({ orderId, text: text.trim() });
+      let attachmentUrl = '';
+
+      if (imageFile) {
+        // Upload image first
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const token = localStorage.getItem('tt_token');
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/upload`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        
+        const uploadData = await uploadRes.json();
+        if (uploadData.status !== 'success') {
+          throw new Error('Image upload failed');
+        }
+        attachmentUrl = uploadData.data.url;
+      }
+
+      await chatApi.sendMessage({ 
+        orderId, 
+        text: text.trim() || (attachmentUrl ? '📷 Image' : ''), 
+        attachmentUrl 
+      });
+      
       setText('');
+      setImageFile(null);
       await fetchMessages();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send message.');
+      setError(err.response?.data?.message || err.message || 'Failed to send message.');
     } finally {
       setSending(false);
     }
@@ -198,6 +247,15 @@ const OrderChat = ({ orderId }) => {
                                 : 'bg-surface-3 text-zinc-300 rounded-bl-md border border-white/5'
                               }`}
                           >
+                            {msg.attachmentUrl && (
+                              <a href={msg.attachmentUrl} target="_blank" rel="noopener noreferrer">
+                                <img 
+                                  src={msg.attachmentUrl} 
+                                  alt="Attachment" 
+                                  className="w-48 h-auto rounded-lg mb-2 object-cover border border-white/10"
+                                />
+                              </a>
+                            )}
                             <p className="break-words whitespace-pre-wrap">{msg.text}</p>
                             <p className={`text-[10px] mt-1 ${isMe ? 'text-violet-200/60' : 'text-zinc-600'}`}>
                               {formatTime(msg.createdAt)}
@@ -225,8 +283,60 @@ const OrderChat = ({ orderId }) => {
               )}
             </AnimatePresence>
 
+            {/* Image Preview */}
+            <AnimatePresence>
+              {imageFile && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-4 py-2 bg-surface-2 border-t border-white/5 flex items-center gap-3 overflow-hidden"
+                >
+                  <div className="relative">
+                    <img 
+                      src={URL.createObjectURL(imageFile)} 
+                      alt="Preview" 
+                      className="w-12 h-12 object-cover rounded-lg border border-white/10"
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setImageFile(null)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-400 truncate flex-1">{imageFile.name}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Input Area */}
             <form onSubmit={handleSend} className="px-3 py-2.5 border-t border-white/5 bg-surface-2/30 flex items-center gap-2">
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                onChange={(e) => {
+                  if (e.target.files[0]) setImageFile(e.target.files[0]);
+                }} 
+                className="hidden" 
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending}
+                className="w-10 h-10 rounded-xl bg-surface-3/50 hover:bg-surface-3 border border-white/5 
+                           text-zinc-400 hover:text-violet-400 disabled:opacity-40 
+                           flex items-center justify-center transition-colors shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              
               <input
                 type="text"
                 value={text}
@@ -239,7 +349,7 @@ const OrderChat = ({ orderId }) => {
               />
               <button
                 type="submit"
-                disabled={!text.trim() || sending}
+                disabled={(!text.trim() && !imageFile) || sending}
                 className="w-10 h-10 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 
                            disabled:hover:bg-violet-600 flex items-center justify-center transition-colors shrink-0"
               >
