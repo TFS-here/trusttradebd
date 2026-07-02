@@ -57,7 +57,22 @@ const OrderDetail = ({ role = 'buyer' }) => {
       if (action === 'confirm_delivery') res = await orderApi.confirmDelivery(id);
       else if (action === 'cancel')      res = await orderApi.cancel(id);
       else if (action === 'ship')        res = await orderApi.ship(id, { trackingNumber: trackingInput });
-      setSuccess(res.data.message); setOrder(res.data.data.order); setDialog(null);
+      else if (action === 'simulate_delivery') {
+        const token = localStorage.getItem('tt_admin_token');
+        res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/orders/${id}/simulate-delivery`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(r => r.json());
+        if (res.status !== 'success') throw new Error(res.message);
+        res = { data: res }; // Wrap to match axios structure
+      }
+      setSuccess(res.data.message); 
+      if (action !== 'simulate_delivery') {
+        setOrder(res.data.data.order); 
+      } else {
+        fetchOrder(); // Refetch to get updated status
+      }
+      setDialog(null);
     } catch (err) { setActErr(err.response?.data?.message || 'Action failed.'); }
     finally { setActLoad(false); }
   };
@@ -260,6 +275,11 @@ const OrderDetail = ({ role = 'buyer' }) => {
                   🚀 Generate Pathao Consignment & Dispatch
                 </button>
               )}
+              {role === 'admin' && escrowStatus === 'SHIPPED' && (
+                <button onClick={() => setDialog({ type: 'simulate_delivery' })} className="w-full btn-primary py-3 bg-violet-600 hover:bg-violet-500">
+                  🧪 Simulate Pathao Delivery (Trigger Webhook)
+                </button>
+              )}
             </div>
           )}
 
@@ -294,6 +314,12 @@ const OrderDetail = ({ role = 'buyer' }) => {
           <ConfirmDialog title="Mark as Shipped?"
             message="Confirm you have dispatched this order. The buyer will be notified to confirm delivery."
             onConfirm={() => handleAction('ship')}
+            onCancel={() => setDialog(null)} loading={actionLoading} />
+        )}
+        {dialog?.type === 'simulate_delivery' && (
+          <ConfirmDialog title="Simulate Pathao Delivery?"
+            message="This will instantly trigger the delivery webhook, marking the order as Delivered and starting the 72-hour escrow countdown. Are you sure?"
+            onConfirm={() => handleAction('simulate_delivery')}
             onCancel={() => setDialog(null)} loading={actionLoading} />
         )}
       </AnimatePresence>

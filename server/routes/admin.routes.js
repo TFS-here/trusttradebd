@@ -47,6 +47,7 @@ router.get('/orders',               getOrders);
 router.patch('/orders/:id/hold',    holdOrder);
 router.patch('/orders/:id/release', releaseOrder);
 router.patch('/orders/:id/refund',  refundOrder);
+router.post('/orders/:id/simulate-delivery', require('../controllers/admin.controller').simulateDelivery);
 
 // ── Product moderation ────────────────────────────────────────────
 router.patch('/products/:id/ban',   banProduct);

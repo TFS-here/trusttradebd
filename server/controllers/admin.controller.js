@@ -706,6 +706,39 @@ const hideReview = async (req, res, next) => {
     next(err);
   }
 };
+/**
+ * POST /api/admin/orders/:id/simulate-delivery
+ * Manually transition a SHIPPED order to DELIVERED (Simulating Pathao Webhook).
+ */
+const simulateDelivery = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return next(ApiError.notFound('Order'));
+
+    if (order.escrowStatus !== 'SHIPPED') {
+      return next(ApiError.badRequest(`Cannot deliver order in ${order.escrowStatus} state.`));
+    }
+
+    // Set escrow release date exactly 72 hours (3 days) forward
+    const releaseDate = new Date();
+    releaseDate.setHours(releaseDate.getHours() + 72);
+
+    // Use admin actor
+    const adminActor = { _id: req.user._id, role: 'admin' };
+    
+    order.transitionEscrow('DELIVERED', adminActor, 'Admin simulated delivery.');
+    order.escrowReleaseDate = releaseDate;
+    await order.save();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Order simulated as Delivered. Escrow countdown started.',
+      data: { releaseDate },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 module.exports = {
   adminLogin,
@@ -720,6 +753,7 @@ module.exports = {
   holdOrder,
   releaseOrder,
   refundOrder,
+  simulateDelivery,
   banProduct,
   unbanProduct,
   hideReview,
