@@ -199,9 +199,19 @@ const OrderDetail = ({ role = 'buyer' }) => {
               <p>{shippingAddress.phone}</p>
             </div>
             {trackingNumber && (
-              <div className="mt-3 pt-3 border-t border-white/5">
-                <p className="text-xs text-zinc-600">Tracking number</p>
-                <p className="font-mono text-sm font-semibold text-violet-400">{trackingNumber}</p>
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Logistics Partner</p>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-red-500/10 text-red-500 text-xs font-bold px-2 py-0.5 rounded">Pathao</span>
+                    <p className="font-mono text-sm font-semibold text-zinc-100">{trackingNumber}</p>
+                  </div>
+                </div>
+                <a href={`https://pathao.com/bd/courier/track-parcel/?consignment_id=${trackingNumber}`} 
+                   target="_blank" rel="noreferrer"
+                   className="btn-primary py-1.5 px-3 text-xs bg-white/5 hover:bg-white/10 text-white border-0">
+                  Track Parcel
+                </a>
               </div>
             )}
           </div>
@@ -242,14 +252,9 @@ const OrderDetail = ({ role = 'buyer' }) => {
                 </button>
               )}
               {role === 'seller' && escrowStatus === 'LOCKED' && (
-                <div className="flex-1 flex gap-2">
-                  <input value={trackingInput} onChange={e => setTracking(e.target.value)}
-                    placeholder="Tracking number (optional)"
-                    className="input flex-1" />
-                  <button onClick={() => setDialog({ type: 'ship' })} className="btn-primary px-5 shrink-0">
-                    📦 Mark as Shipped
-                  </button>
-                </div>
+                <button onClick={() => setDialog({ type: 'ship' })} className="flex-1 btn-primary py-3">
+                  🚀 Generate Pathao Consignment & Dispatch
+                </button>
               )}
             </div>
           )}
