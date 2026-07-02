@@ -17,6 +17,12 @@ exports.pathaoWebhook = async (req, res, next) => {
     const secret = req.headers['x-pathao-secret'] || req.headers['authorization'];
     const expectedSecret = process.env.PATHAO_WEBHOOK_SECRET;
 
+    // ── Pathao Webhook Integration Validation Handshake ──
+    if (req.body.event === 'webhook_integration') {
+      res.setHeader('X-Pathao-Merchant-Webhook-Integration-Secret', expectedSecret || '');
+      return res.status(202).json({ received: true });
+    }
+
     if (expectedSecret && secret !== expectedSecret) {
       console.warn('⚠️ Pathao webhook received with invalid secret.');
       // Still return 200 to prevent Pathao from retrying, but do nothing
