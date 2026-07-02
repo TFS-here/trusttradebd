@@ -261,6 +261,11 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center gap-2">
+                {localStorage.getItem('tt_admin_token') && (
+                  <Link to="/admin/dashboard" className="hidden sm:block btn-secondary text-sm px-4 py-2 bg-violet-500/10 border-violet-500/20 text-violet-400 hover:bg-violet-500/20">
+                    Return to Admin
+                  </Link>
+                )}
                 <Link to="/login" className="btn-ghost text-sm px-4 py-2">Sign in</Link>
                 <Link to="/register" className="btn-primary text-sm px-4 py-2">Get started</Link>
               </div>
@@ -268,9 +273,8 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {/* Mobile menu */}
         <AnimatePresence>
-          {mobileOpen && user && (
+          {mobileOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -278,17 +282,26 @@ const Navbar = () => {
               className="md:hidden border-t border-white/5 overflow-hidden relative bg-surface-0/95 backdrop-blur-xl"
             >
               <div className="px-4 py-3 space-y-1">
-                {navLinks.map(l => (
-                  <NavLink key={l.to} to={l.to} end={l.end}
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      `block px-3 py-2.5 rounded-xl text-sm font-medium transition
-                       ${isActive ? 'bg-violet-500/15 text-violet-400' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`
-                    }
-                  >
-                    {l.label}
-                  </NavLink>
-                ))}
+                {user ? (
+                  navLinks.map(l => (
+                    <NavLink key={l.to} to={l.to} end={l.end}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        `block px-3 py-2.5 rounded-xl text-sm font-medium transition
+                         ${isActive ? 'bg-violet-500/15 text-violet-400' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`
+                      }
+                    >
+                      {l.label}
+                    </NavLink>
+                  ))
+                ) : (
+                  localStorage.getItem('tt_admin_token') && (
+                    <Link to="/admin/dashboard" onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2.5 rounded-xl text-sm font-medium transition text-violet-400 hover:bg-violet-500/15">
+                      Return to Admin
+                    </Link>
+                  )
+                )}
               </div>
             </motion.div>
           )}
