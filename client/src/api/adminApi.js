@@ -43,6 +43,7 @@ export const adminApi = {
   holdOrder: (id, reason)      => api.patch(`/admin/orders/${id}/hold`, { reason }),
   releaseOrder: (id, note)     => api.patch(`/admin/orders/${id}/release`, { note }),
   refundOrder: (id, note)      => api.patch(`/admin/orders/${id}/refund`, { note }),
+  simulateDelivery: (id)       => api.post(`/admin/orders/${id}/simulate-delivery`),
 
   // Products
   banProduct: (id, reason)     => api.patch(`/admin/products/${id}/ban`, { reason }),

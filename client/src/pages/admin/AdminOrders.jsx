@@ -21,6 +21,7 @@ const ActionModal = ({ order, action, onConfirm, onCancel }) => {
     hold:    { title: 'Place on Hold',     btn: 'Hold Order',    cls: 'btn-danger',   required: true  },
     release: { title: 'Release to Seller', btn: 'Release Funds', cls: 'btn-emerald',  required: false },
     refund:  { title: 'Refund to Buyer',   btn: 'Issue Refund',  cls: 'btn-danger',   required: false },
+    simulate_delivery: { title: 'Simulate Pathao Delivery', btn: 'Trigger Webhook', cls: 'btn-primary', required: false },
   };
   const cfg = configs[action];
 
@@ -102,8 +103,15 @@ const AdminOrders = () => {
     const { action, order } = modal;
     let res;
     if (action === 'hold')    res = await adminApi.holdOrder(order._id, note || 'Admin hold');
-    if (action === 'release') res = await adminApi.releaseOrder(order._id, note);
-    if (action === 'refund')  res = await adminApi.refundOrder(order._id, note);
+    else if (action === 'release') res = await adminApi.releaseOrder(order._id, note);
+    else if (action === 'refund')  res = await adminApi.refundOrder(order._id, note);
+    else if (action === 'simulate_delivery') {
+      res = await adminApi.simulateDelivery(order._id);
+      fetchOrders(); // Refetch all to get updated statuses safely
+      setModal(null);
+      showFeedback(order._id, 'Simulated Delivery');
+      return;
+    }
     const updated = res.data.data.order;
     setOrders(p => p.map(o => o._id === updated._id ? updated : o));
     setModal(null);
@@ -189,6 +197,12 @@ const AdminOrders = () => {
                   </AnimatePresence>
                   {isActionable && (
                     <div className="flex items-center gap-2 shrink-0">
+                      {order.escrowStatus === 'SHIPPED' && (
+                        <button onClick={() => setModal({ action: 'simulate_delivery', order })}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 hover:bg-violet-500/20 transition font-medium">
+                          Simulate Delivery
+                        </button>
+                      )}
                       {!isOnHold && (
                         <button onClick={() => setModal({ action: 'hold', order })}
                           className="text-xs px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-400 hover:bg-amber-400/20 transition font-medium">
