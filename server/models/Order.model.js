@@ -4,11 +4,13 @@ const mongoose = require('mongoose');
  * Escrow State Machine
  * ────────────────────────────────────────────────────────────────
  *
- *  LOCKED ──► SHIPPED ──► DELIVERED ──► RELEASED
- *    │            │
- *    └──────────► ON_HOLD ──► REFUNDED
+ *  PENDING_PAYMENT ──► LOCKED ──► SHIPPED ──► DELIVERED ──► RELEASED
+ *                        │            │
+ *                        └──────────► ON_HOLD ──► REFUNDED
  *
- *  LOCKED    : Buyer placed order, funds deducted from buyer wallet
+ *  PENDING_PAYMENT : Order created, awaiting SSLCommerz payment confirmation.
+ *                    (Wallet-funded orders skip this and start at LOCKED.)
+ *  LOCKED    : Funds secured (wallet deducted OR gateway payment verified)
  *              and held in escrow. Seller must ship.
  *  SHIPPED   : Seller marked as shipped. Buyer must confirm delivery.
  *  DELIVERED : Buyer confirmed receipt. Funds queued for release.
@@ -16,13 +18,14 @@ const mongoose = require('mongoose');
  *  ON_HOLD   : Admin flagged for dispute. No fund movement allowed.
  *  REFUNDED  : Admin issued refund. Funds returned to buyer. Final.
  */
-const ESCROW_STATES = ['LOCKED', 'SHIPPED', 'DELIVERED', 'RELEASED', 'ON_HOLD', 'REFUNDED'];
+const ESCROW_STATES = ['PENDING_PAYMENT', 'LOCKED', 'SHIPPED', 'DELIVERED', 'RELEASED', 'ON_HOLD', 'REFUNDED'];
 
 /**
  * Valid state transitions. Only these moves are legal.
  * Controller must validate against this map before any state change.
  */
 const VALID_TRANSITIONS = {
+  PENDING_PAYMENT: ['LOCKED'],  // SSLCommerz payment verified → funds locked
   LOCKED: ['SHIPPED', 'ON_HOLD'],
   SHIPPED: ['DELIVERED', 'ON_HOLD'],
   DELIVERED: ['RELEASED', 'ON_HOLD'],
@@ -119,6 +122,36 @@ const orderSchema = new mongoose.Schema(
       default: [],
     },
 
+    // ── Payment Gateway ──────────────────────────────────────────
+    // Tracks HOW the order was funded and the gateway payment lifecycle.
+    paymentMethod: {
+      type: String,
+      enum: ['wallet', 'sslcommerz'],
+      default: 'wallet',
+    },
+
+    /**
+     * Payment status (separate from escrow status):
+     *   PENDING  — Awaiting SSLCommerz payment (gateway orders only)
+     *   ESCROWED — Payment confirmed, funds held in escrow
+     *   FAILED   — Gateway payment failed or was abandoned
+     *
+     * For wallet orders, this is immediately set to 'ESCROWED'
+     * since wallet funds are deducted at order creation time.
+     */
+    paymentStatus: {
+      type: String,
+      enum: ['PENDING', 'ESCROWED', 'FAILED'],
+      default: 'ESCROWED',
+    },
+
+    // SSLCommerz-specific metadata (populated only for gateway payments)
+    sslcommerz: {
+      tran_id: { type: String, default: '' },  // SSLCommerz transaction ID
+      val_id:  { type: String, default: '' },  // Validation ID (proof of payment)
+      paidAt:  { type: Date },                 // When payment was confirmed
+    },
+
     // ── Shipping ──────────────────────────────────────────────────
     shippingAddress: {
       fullName: { type: String, default: '' },
@@ -164,6 +197,8 @@ orderSchema.index({ buyer: 1, createdAt: -1 });
 orderSchema.index({ seller: 1, createdAt: -1 });
 orderSchema.index({ escrowStatus: 1 });
 orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'sslcommerz.tran_id': 1 });   // Fast IPN lookup
+orderSchema.index({ paymentStatus: 1 });
 
 // ── Instance method: attempt state transition ─────────────────────
 /**

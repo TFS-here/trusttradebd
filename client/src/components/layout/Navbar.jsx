@@ -184,7 +184,7 @@ const Navbar = () => {
   const handleLogout = async () => { await logout(); navigate('/login'); };
 
   const navLinks = user?.role === 'seller'
-    ? [{ label: 'Browse', to: '/', end: true }, { label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }]
+    ? [{ label: 'Dashboard', to: '/seller/dashboard' }, { label: 'Browse', to: '/', end: true }, { label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }]
     : [{ label: 'Browse', to: '/', end: true }, { label: 'My Orders', to: '/orders' }];
 
   return (

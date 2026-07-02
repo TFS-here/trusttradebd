@@ -20,6 +20,7 @@ const reviewRoutes  = require('./routes/review.routes');
 const adminRoutes   = require('./routes/admin.routes');
 const qaRoutes      = require('./routes/qa.routes');
 const uploadRoutes  = require('./routes/upload.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 
 const app = express();
@@ -36,7 +37,7 @@ app.use(
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'idempotency-key', 'x-idempotency-key'],
   })
 );
 
@@ -96,6 +97,7 @@ app.use('/api/reviews',  reviewRoutes);
 app.use('/api/admin',    adminRoutes);
 app.use('/api/qa',       qaRoutes);
 app.use('/api/upload',   uploadRoutes);
+app.use('/api/payment',  paymentRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────
 app.all('*', (req, res, next) => {

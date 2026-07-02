@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   placeOrder,
+  createOrder,
   getOrders,
   getSellerAnalytics,
   getOrder,
@@ -24,7 +25,8 @@ router.get('/:id',           getOrder);
 router.get('/:id/receipt',   downloadReceipt);   // PDF download
 
 // ── Buyer only ────────────────────────────────────────────────────
-router.post('/',                       roleGuard('buyer'), placeOrder);
+router.post('/',                       roleGuard('buyer'), placeOrder);           // Wallet-funded
+router.post('/create-for-payment',     roleGuard('buyer'), createOrder);          // SSLCommerz-funded
 router.patch('/:id/confirm-delivery',  roleGuard('buyer'), confirmDelivery);
 router.patch('/:id/cancel',            roleGuard('buyer'), cancelOrder);
 
@@ -32,3 +34,4 @@ router.patch('/:id/cancel',            roleGuard('buyer'), cancelOrder);
 router.patch('/:id/ship', roleGuard('seller'), markShipped);
 
 module.exports = router;
+

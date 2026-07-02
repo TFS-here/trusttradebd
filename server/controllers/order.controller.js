@@ -573,8 +573,224 @@ const downloadReceipt = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/orders/create-for-payment
+ * ────────────────────────────────────────────────────────────────
+ * Creates an order intended for SSLCommerz payment (not wallet).
+ *
+ * SECURITY STANDARD #1: SERVER-SIDE PRICE VALIDATION
+ * The frontend does NOT pass any price/amount. We fetch verified
+ * product prices from MongoDB and compute the total server-side.
+ *
+ * Flow:
+ *   1. Validate items + fetch products (server-side price)
+ *   2. Atomically decrement stock
+ *   3. Create Order with paymentStatus: 'PENDING', escrowStatus: 'PENDING_PAYMENT'
+ *   4. Return orderId — frontend then calls POST /api/payment/initiate
+ *
+ * NO wallet deduction happens here. Funds are only locked after
+ * SSLCommerz confirms payment via the IPN webhook.
+ */
+const createOrder = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { items, shippingAddress } = req.body;
+
+    // ── Input validation ─────────────────────────────────────────
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      await session.abortTransaction();
+      return next(ApiError.badRequest('Order must contain at least one item.'));
+    }
+
+    if (!shippingAddress?.address || !shippingAddress?.city || !shippingAddress?.phone) {
+      await session.abortTransaction();
+      return next(ApiError.badRequest('Shipping address (address, city, phone) is required.'));
+    }
+
+    // ── Fetch + validate every product (SERVER-SIDE PRICE) ──────
+    const productIds = items.map((i) => i.productId);
+    const products = await Product.find({
+      _id: { $in: productIds },
+      isActive: true,
+      isBanned: false,
+    }).session(session);
+
+    if (products.length !== productIds.length) {
+      await session.abortTransaction();
+      return next(ApiError.badRequest('One or more products are unavailable or do not exist.'));
+    }
+
+    const productMap = Object.fromEntries(products.map((p) => [p._id.toString(), p]));
+
+    // ── Build order items + compute total (from DB prices) ──────
+    const orderItems = [];
+    let totalAmount = 0;
+    let sellerId = null;
+
+    for (const item of items) {
+      const product = productMap[item.productId];
+      if (!product) {
+        await session.abortTransaction();
+        return next(ApiError.badRequest(`Product ${item.productId} not found.`));
+      }
+
+      // Enforce single-seller orders
+      if (sellerId && product.seller.toString() !== sellerId) {
+        await session.abortTransaction();
+        return next(
+          ApiError.badRequest(
+            'All items in one order must be from the same seller. ' +
+              'Please place separate orders for different sellers.'
+          )
+        );
+      }
+      sellerId = product.seller.toString();
+
+      // Buyer cannot order their own product
+      if (sellerId === req.user._id.toString()) {
+        await session.abortTransaction();
+        return next(ApiError.badRequest('You cannot purchase your own products.'));
+      }
+
+      const qty = parseInt(item.quantity, 10) || 1;
+      if (qty < 1 || qty > 10) {
+        await session.abortTransaction();
+        return next(ApiError.badRequest(`Quantity for "${product.title}" must be between 1 and 10.`));
+      }
+
+      if (product.stock < qty) {
+        await session.abortTransaction();
+        return next(
+          ApiError.badRequest(
+            `Insufficient stock for "${product.title}". Available: ${product.stock}, requested: ${qty}.`
+          )
+        );
+      }
+
+      // PRICE FROM DATABASE — not from the request
+      const lineTotal = parseFloat((product.price * qty).toFixed(2));
+      totalAmount += lineTotal;
+
+      orderItems.push({
+        product: product._id,
+        title: product.title,
+        price: product.price,   // snapshot at purchase time
+        quantity: qty,
+        image: product.images?.[0] || '',
+      });
+    }
+
+    totalAmount = parseFloat(totalAmount.toFixed(2));
+
+    // ── Atomically decrement stock ───────────────────────────────
+    for (const item of orderItems) {
+      const decremented = await Product.findOneAndUpdate(
+        {
+          _id: item.product,
+          stock: { $gte: item.quantity },
+          isActive: true,
+          isBanned: false,
+        },
+        {
+          $inc: { stock: -item.quantity },
+          $set: { hasSold: true },
+        },
+        { new: true, session }
+      );
+
+      if (!decremented) {
+        await session.abortTransaction();
+        return next(
+          ApiError.badRequest(
+            `"${item.title}" just went out of stock. Please remove it and try again.`
+          )
+        );
+      }
+
+      if (decremented.stock === 0) {
+        await Product.findByIdAndUpdate(
+          item.product,
+          { isActive: false },
+          { session }
+        );
+      }
+    }
+
+    // ── Compute financials ────────────────────────────────────────
+    const platformFee = parseFloat(((totalAmount * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+    const sellerReceives = parseFloat((totalAmount - platformFee).toFixed(2));
+
+    // ── Fetch buyer for name/address defaults ─────────────────────
+    const buyer = await User.findById(req.user._id).session(session);
+
+    // ── Create the order ──────────────────────────────────────────
+    // KEY DIFFERENCE from placeOrder:
+    //   - paymentMethod: 'sslcommerz'
+    //   - paymentStatus: 'PENDING' (awaiting gateway payment)
+    //   - escrowStatus: 'PENDING_PAYMENT' (no funds yet)
+    const [order] = await Order.create(
+      [
+        {
+          buyer: req.user._id,
+          seller: sellerId,
+          items: orderItems,
+          totalAmount,
+          platformFee,
+          sellerReceives,
+          paymentMethod: 'sslcommerz',
+          paymentStatus: 'PENDING',
+          escrowStatus: 'PENDING_PAYMENT',
+          shippingAddress: {
+            fullName: shippingAddress.fullName || buyer.name,
+            address: shippingAddress.address,
+            city: shippingAddress.city,
+            district: shippingAddress.district || '',
+            postalCode: shippingAddress.postalCode || '',
+            phone: shippingAddress.phone,
+          },
+          escrowHistory: [
+            {
+              from: null,
+              to: 'PENDING_PAYMENT',
+              actor: req.user._id,
+              actorRole: 'buyer',
+              note: 'Order created — awaiting SSLCommerz payment.',
+              timestamp: new Date(),
+            },
+          ],
+        },
+      ],
+      { session }
+    );
+
+    // ── Commit ────────────────────────────────────────────────────
+    // NOTE: No wallet deduction here. Funds are locked ONLY after
+    // SSLCommerz IPN confirms payment in payment.controller.js.
+    await session.commitTransaction();
+
+    const populated = await populateOrder(Order.findById(order._id));
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'Order created. Proceed to payment.',
+      data: {
+        order: populated,
+        nextStep: 'POST /api/payment/initiate with { orderId }',
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    next(err);
+  } finally {
+    session.endSession();
+  }
+};
+
 module.exports = {
   placeOrder,
+  createOrder,
   getOrders,
   getSellerAnalytics,
   getOrder,
