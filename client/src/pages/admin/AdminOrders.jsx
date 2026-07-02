@@ -150,9 +150,9 @@ const AdminOrders = () => {
                   className="flex items-center gap-4 px-5 py-4 hover:bg-white/3 transition">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-mono text-sm font-semibold text-zinc-200">
+                      <Link to={`/orders/${order._id}`} className="font-mono text-sm font-semibold text-zinc-200 hover:text-violet-400 hover:underline transition">
                         #{order._id.slice(-8).toUpperCase()}
-                      </span>
+                      </Link>
                       <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${ESCROW_STYLES[order.escrowStatus] || 'badge-zinc'}`}>
                         {order.escrowStatus}
                       </span>
