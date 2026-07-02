@@ -43,7 +43,7 @@ class PathaoService {
       return this.accessToken;
     } catch (error) {
       console.error('Pathao Auth Error:', error.response?.data || error.message);
-      throw new ApiError('Failed to authenticate with Pathao API', 500);
+      throw ApiError.internal('Failed to authenticate with Pathao API');
     }
   }
 
@@ -115,7 +115,7 @@ class PathaoService {
           message = data.message;
         }
       }
-      throw new ApiError(message, 400);
+      throw ApiError.badRequest(message);
     }
   }
 }
