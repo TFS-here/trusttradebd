@@ -378,10 +378,18 @@ const markShipped = async (req, res, next) => {
     }
 
     // Validates transition, appends to escrowHistory, sets shippedAt
-    order.transitionEscrow('SHIPPED', req.user, req.body.note || '');
+    order.transitionEscrow('SHIPPED', req.user, req.body.note || 'Order shipped via Pathao Sandbox.');
 
-    if (req.body.trackingNumber) {
-      order.trackingNumber = req.body.trackingNumber.trim();
+    // ── Generate Pathao Consignment ──
+    const sellerUser = await mongoose.model('User').findById(order.seller).session(session);
+    try {
+      const pathaoService = require('../services/pathao.service');
+      // This will throw if it fails, which gracefully aborts our mongoose transaction
+      const consignmentId = await pathaoService.createConsignment(order, sellerUser);
+      order.trackingNumber = consignmentId;
+    } catch (pathaoErr) {
+      await session.abortTransaction();
+      return next(ApiError.badRequest(`Pathao Courier Error: ${pathaoErr.message}`));
     }
 
     await order.save({ session });
