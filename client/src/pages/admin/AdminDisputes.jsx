@@ -33,9 +33,7 @@ const AdminDisputes = () => {
 
   const handleResolveBuyerFavor = async () => {
     if (!selected) return;
-    setResolving(true);
-    setError('');
-    setSuccessMsg('');
+    setResolving(true); setError(''); setSuccessMsg('');
     try {
       await adminApi.resolveDisputeBuyerFavor(selected._id, resolveForm);
       setSuccessMsg('Dispute resolved in buyer\'s favor. Refund issued & seller penalized.');
@@ -44,9 +42,21 @@ const AdminDisputes = () => {
       await fetchDisputes();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resolve dispute.');
-    } finally {
-      setResolving(false);
-    }
+    } finally { setResolving(false); }
+  };
+
+  const handleResolveSellerFavor = async () => {
+    if (!selected) return;
+    setResolving(true); setError(''); setSuccessMsg('');
+    try {
+      await adminApi.resolveDisputeSellerFavor(selected._id, { adminNotes: resolveForm.adminNotes });
+      setSuccessMsg('Dispute rejected. Funds released to seller.');
+      setSelected(null);
+      setResolveForm({ adminNotes: '', deliveryFeePenalty: 100 });
+      await fetchDisputes();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to resolve dispute.');
+    } finally { setResolving(false); }
   };
 
   if (loading) return (
@@ -195,32 +205,31 @@ const AdminDisputes = () => {
                 <p className="text-sm text-zinc-300">{selected.reason}</p>
               </div>
 
-              {/* Evidence */}
+              {/* Evidence — inline video player + fallback link */}
               {(selected.unboxingVideoUrl || selected.adminReportPdfUrl) && (
-                <div className="space-y-2">
-                  <p className="text-xs text-zinc-600 uppercase tracking-wider">Evidence</p>
-                  <div className="flex gap-3">
-                    {selected.unboxingVideoUrl && (
+                <div className="space-y-3">
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider">Evidence</p>
+                  {selected.unboxingVideoUrl && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-zinc-600">🎥 Unboxing Video</p>
+                      <video
+                        src={selected.unboxingVideoUrl}
+                        controls
+                        className="w-full rounded-xl border border-white/10 bg-black max-h-64 object-contain"
+                      />
                       <a href={selected.unboxingVideoUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 text-violet-400 
-                                   px-3 py-2 rounded-xl text-xs font-medium hover:bg-violet-500/20 transition">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Unboxing Video
+                        className="inline-block text-xs text-violet-400 hover:underline">
+                        Open in new tab ↗
                       </a>
-                    )}
-                    {selected.adminReportPdfUrl && (
-                      <a href={selected.adminReportPdfUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 
-                                   px-3 py-2 rounded-xl text-xs font-medium hover:bg-amber-500/20 transition">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Admin Report PDF
-                      </a>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                  {selected.adminReportPdfUrl && (
+                    <a href={selected.adminReportPdfUrl} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 
+                                 px-3 py-2 rounded-xl text-xs font-medium hover:bg-amber-500/20 transition">
+                      📄 Admin Report PDF
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -249,20 +258,23 @@ const AdminDisputes = () => {
                                  text-zinc-200 focus:outline-none focus:border-violet-500/40 transition"
                     />
                   </div>
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      onClick={() => setSelected(null)}
-                      className="flex-1 btn-secondary text-sm py-2.5"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex flex-col gap-3 pt-2">
                     <button
                       onClick={handleResolveBuyerFavor}
                       disabled={resolving || !resolveForm.adminNotes.trim()}
-                      className="flex-1 text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
-                                 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30"
-                    >
-                      {resolving ? 'Processing...' : '✅ Resolve in Buyer\'s Favor'}
+                      className="w-full text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
+                                 bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30">
+                      {resolving ? 'Processing…' : '🔴 Rule in Buyer\'s Favor (Refund + Penalize Seller)'}
+                    </button>
+                    <button
+                      onClick={handleResolveSellerFavor}
+                      disabled={resolving || !resolveForm.adminNotes.trim()}
+                      className="w-full text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
+                                 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30">
+                      {resolving ? 'Processing…' : '🟢 Rule in Seller\'s Favor (Release Funds)'}
+                    </button>
+                    <button onClick={() => setSelected(null)} className="w-full btn-secondary text-sm py-2">
+                      Cancel
                     </button>
                   </div>
                 </div>

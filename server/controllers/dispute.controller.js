@@ -142,3 +142,134 @@ exports.resolveDisputeInBuyerFavor = async (req, res, next) => {
     return next(new ApiError(error.message, error.statusCode || 500));
   }
 };
+
+/**
+ * POST /api/disputes
+ * submitDispute (Buyer)
+ * ─────────────────────────────────────────────────────────────────
+ * Buyer submits a dispute for a DELIVERED order within the 24h window.
+ */
+exports.submitDispute = async (req, res, next) => {
+  try {
+    const { orderId, reason, unboxingVideoUrl } = req.body;
+
+    if (!orderId || !reason || !unboxingVideoUrl) {
+      return next(new ApiError('Order ID, reason, and unboxing video URL are required.', 400));
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) return next(new ApiError('Order not found.', 404));
+
+    if (order.buyer.toString() !== req.user._id.toString()) {
+      return next(new ApiError('Unauthorized to dispute this order.', 403));
+    }
+
+    if (order.escrowStatus !== 'DELIVERED') {
+      return next(new ApiError('Dispute can only be opened for delivered orders.', 400));
+    }
+
+    // Check if within 24h window
+    if (order.escrowReleaseDate && order.escrowReleaseDate < new Date()) {
+      return next(new ApiError('Dispute window has closed.', 400));
+    }
+
+    // Check if dispute already exists
+    const existing = await Dispute.findOne({ order: orderId });
+    if (existing) {
+      return next(new ApiError('A dispute already exists for this order.', 400));
+    }
+
+    // Start transaction to create dispute and hold order
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const dispute = await Dispute.create([{
+        order: orderId,
+        buyer: order.buyer,
+        seller: order.seller,
+        reason,
+        unboxingVideoUrl
+      }], { session });
+
+      const buyerActor = { _id: req.user._id, role: 'buyer' };
+      order.transitionEscrow('ON_HOLD', buyerActor, 'Buyer raised a dispute.');
+      await order.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({
+        status: 'success',
+        message: 'Dispute submitted successfully. Order is on hold.',
+        data: dispute[0]
+      });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      throw err;
+    }
+  } catch (error) {
+    next(new ApiError(error.message, 500));
+  }
+};
+
+/**
+ * POST /api/disputes/:disputeId/resolve-seller-favor
+ * resolveDisputeInSellerFavor (Admin)
+ * ─────────────────────────────────────────────────────────────────
+ * Admin rejects buyer's dispute (e.g., video doesn't show defect).
+ * Releases funds to seller.
+ */
+exports.resolveDisputeInSellerFavor = async (req, res, next) => {
+  const { disputeId } = req.params;
+  const { adminNotes } = req.body;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const dispute = await Dispute.findById(disputeId).populate('order').session(session);
+    if (!dispute) throw new ApiError('Dispute not found.', 404);
+    if (dispute.status !== 'Pending') throw new ApiError('Dispute already resolved.', 400);
+
+    const order = dispute.order;
+    if (!order) throw new ApiError('Order not found.', 404);
+
+    // Use releaseFunds utility to handle the atomic transfer and fee deduction
+    const { releaseFunds } = require('../utils/escrow');
+    const { sellerReceives, platformFee } = await releaseFunds(session, {
+      buyerId: order.buyer,
+      sellerId: order.seller,
+      amount: order.totalAmount,
+      orderId: order._id,
+      initiatedBy: req.user._id
+    });
+
+    order.sellerReceives = sellerReceives;
+    order.platformFee = platformFee;
+
+    const adminActor = { _id: req.user._id, role: 'admin' };
+    order.transitionEscrow('RELEASED', adminActor, `Dispute rejected. Admin notes: ${adminNotes}`);
+    await order.save({ session });
+
+    dispute.status = 'Seller_Won';
+    dispute.adminNotes = adminNotes;
+    dispute.resolvedBy = req.user._id;
+    dispute.resolvedAt = new Date();
+    await dispute.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Dispute rejected. Funds released to seller.',
+      data: { dispute, order }
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    return next(new ApiError(error.message, error.statusCode || 500));
+  }
+};

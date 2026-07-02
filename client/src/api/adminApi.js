@@ -44,6 +44,7 @@ export const adminApi = {
   releaseOrder: (id, note)     => api.patch(`/admin/orders/${id}/release`, { note }),
   refundOrder: (id, note)      => api.patch(`/admin/orders/${id}/refund`, { note }),
   simulateDelivery: (id)       => api.post(`/admin/orders/${id}/simulate-delivery`),
+  simulateStatus: (id, status) => api.post(`/admin/orders/${id}/simulate-status`, { status }),
 
   // Products
   banProduct: (id, reason)     => api.patch(`/admin/products/${id}/ban`, { reason }),
@@ -56,4 +57,6 @@ export const adminApi = {
   getDisputes: (params)        => api.get('/disputes', { params }),
   resolveDisputeBuyerFavor: (disputeId, data) =>
     api.post(`/disputes/${disputeId}/resolve-buyer-favor`, data),
+  resolveDisputeSellerFavor: (disputeId, data) =>
+    api.post(`/disputes/${disputeId}/resolve-seller-favor`, data),
 };

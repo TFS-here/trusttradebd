@@ -12,6 +12,8 @@ const {
   holdOrder,
   releaseOrder,
   refundOrder,
+  simulateDelivery,
+  simulateStatus,
   banProduct,
   unbanProduct,
   hideReview,
@@ -47,7 +49,8 @@ router.get('/orders',               getOrders);
 router.patch('/orders/:id/hold',    holdOrder);
 router.patch('/orders/:id/release', releaseOrder);
 router.patch('/orders/:id/refund',  refundOrder);
-router.post('/orders/:id/simulate-delivery', require('../controllers/admin.controller').simulateDelivery);
+router.post('/orders/:id/simulate-delivery', simulateDelivery);
+router.post('/orders/:id/simulate-status',   simulateStatus);
 
 // ── Product moderation ────────────────────────────────────────────
 router.patch('/products/:id/ban',   banProduct);

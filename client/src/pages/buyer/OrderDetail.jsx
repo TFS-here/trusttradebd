@@ -5,6 +5,10 @@ import { orderApi } from '../../api/orderApi';
 import EscrowTracker from '../../components/product/EscrowTracker';
 import WriteReview from '../../components/review/WriteReview';
 import OrderChat from '../../components/chat/OrderChat';
+import CourierStatusTimeline from '../../components/courier/CourierStatusTimeline';
+import DisputeForm from '../../components/courier/DisputeForm';
+
+// ── Helpers ───────────────────────────────────────────────────────
 
 const ConfirmDialog = ({ title, message, onConfirm, onCancel, loading, danger = false }) => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -28,6 +32,29 @@ const ConfirmDialog = ({ title, message, onConfirm, onCancel, loading, danger = 
   </motion.div>
 );
 
+/** Countdown hook: returns { hours, minutes, seconds, expired } */
+const useCountdown = (targetDate) => {
+  const calc = () => {
+    if (!targetDate) return { hours: 0, minutes: 0, seconds: 0, expired: true };
+    const diff = new Date(targetDate) - Date.now();
+    if (diff <= 0) return { hours: 0, minutes: 0, seconds: 0, expired: true };
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1_000);
+    return { hours: h, minutes: m, seconds: s, expired: false };
+  };
+
+  const [state, setState] = useState(calc);
+  useEffect(() => {
+    if (!targetDate) return;
+    const id = setInterval(() => setState(calc()), 1_000);
+    return () => clearInterval(id);
+  }, [targetDate]);
+  return state;
+};
+
+// ── Main Component ────────────────────────────────────────────────
+
 const OrderDetail = ({ role = 'buyer' }) => {
   const { id } = useParams();
   const [order, setOrder]           = useState(null);
@@ -39,6 +66,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
   const [dialog, setDialog]         = useState(null);
   const [trackingInput, setTracking]= useState('');
   const [downloading, setDownload]  = useState(false);
+  const [showDisputeForm, setShowDisputeForm] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -50,30 +78,31 @@ const OrderDetail = ({ role = 'buyer' }) => {
 
   useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
+  const countdown = useCountdown(order?.escrowReleaseDate);
+
   const handleAction = async (action) => {
     setActLoad(true); setActErr(''); setSuccess('');
     try {
       let res;
-      if (action === 'confirm_delivery') res = await orderApi.confirmDelivery(id);
-      else if (action === 'cancel')      res = await orderApi.cancel(id);
-      else if (action === 'ship')        res = await orderApi.ship(id, { trackingNumber: trackingInput });
+      if (action === 'cancel')      res = await orderApi.cancel(id);
+      else if (action === 'ship')   res = await orderApi.ship(id, { trackingNumber: trackingInput });
       else if (action === 'simulate_delivery') {
         const token = localStorage.getItem('tt_admin_token');
-        res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/orders/${id}/simulate-delivery`, {
+        const raw = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/orders/${id}/simulate-status`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Delivered' })
         }).then(r => r.json());
-        if (res.status !== 'success') throw new Error(res.message);
-        res = { data: res }; // Wrap to match axios structure
+        if (raw.status !== 'success') throw new Error(raw.message);
+        fetchOrder();
+        setSuccess(raw.message);
+        setDialog(null);
+        return;
       }
-      setSuccess(res.data.message); 
-      if (action !== 'simulate_delivery') {
-        setOrder(res.data.data.order); 
-      } else {
-        fetchOrder(); // Refetch to get updated status
-      }
+      setSuccess(res.data.message);
+      setOrder(res.data.data.order);
       setDialog(null);
-    } catch (err) { setActErr(err.response?.data?.message || 'Action failed.'); }
+    } catch (err) { setActErr(err.response?.data?.message || err.message || 'Action failed.'); }
     finally { setActLoad(false); }
   };
 
@@ -109,12 +138,21 @@ const OrderDetail = ({ role = 'buyer' }) => {
     </div>
   );
 
-  const { escrowStatus, totalAmount, items, shippingAddress, seller, buyer,
-          trackingNumber, escrowHistory, createdAt, platformFee, sellerReceives } = order;
-  const isTerminal = ['RELEASED', 'REFUNDED'].includes(escrowStatus);
+  const {
+    escrowStatus, totalAmount, items, shippingAddress, seller, buyer,
+    trackingNumber, escrowHistory, createdAt, platformFee, sellerReceives,
+    courierStatus, courierStatusHistory, escrowReleaseDate
+  } = order;
+
+  const isTerminal = ['RELEASED', 'REFUNDED', 'RETURNED'].includes(escrowStatus);
+  const isShippedOrBeyond = ['SHIPPED', 'DELIVERED', 'ON_HOLD', 'RELEASED', 'REFUNDED', 'RETURNED'].includes(escrowStatus);
+
+  // 24h window: buyer can raise dispute if DELIVERED and not expired
+  const canRaiseDispute = role === 'buyer' && escrowStatus === 'DELIVERED' && !countdown.expired;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -164,6 +202,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left — 2/3 */}
         <div className="lg:col-span-2 space-y-5">
+
           {/* Items */}
           <div className="card rounded-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-white/5">
@@ -204,7 +243,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
             </div>
           </div>
 
-          {/* Shipping */}
+          {/* Shipping Address */}
           <div className="card rounded-2xl px-5 py-4">
             <p className="font-semibold text-zinc-200 mb-3">Shipping Address</p>
             <div className="text-sm text-zinc-400 space-y-0.5">
@@ -213,27 +252,62 @@ const OrderDetail = ({ role = 'buyer' }) => {
               <p>{shippingAddress.city}{shippingAddress.district ? `, ${shippingAddress.district}` : ''}</p>
               <p>{shippingAddress.phone}</p>
             </div>
-            {trackingNumber && (
-              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-zinc-500 mb-1">Logistics Partner</p>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-red-500/10 text-red-500 text-xs font-bold px-2 py-0.5 rounded">Pathao</span>
-                    <p className="font-mono text-sm font-semibold text-zinc-100">{trackingNumber}</p>
-                  </div>
-                </div>
-                <a href="https://pathao.com/bd/courier/" 
-                   target="_blank" rel="noreferrer"
-                   onClick={(e) => {
-                     navigator.clipboard.writeText(trackingNumber);
-                     alert('Tracking ID copied to clipboard! Paste it on the Pathao website.');
-                   }}
-                   className="btn-primary py-1.5 px-3 text-xs bg-white/5 hover:bg-white/10 text-white border-0">
-                  Track Parcel
-                </a>
-              </div>
-            )}
           </div>
+
+          {/* Live Pathao Courier Tracker — shows after seller ships */}
+          {isShippedOrBeyond && (
+            <CourierStatusTimeline
+              courierStatus={courierStatus}
+              courierStatusHistory={courierStatusHistory}
+            />
+          )}
+
+          {/* 24h Buyer Inspection Window — shows after DELIVERED */}
+          {role === 'buyer' && escrowStatus === 'DELIVERED' && (
+            <div className={`card rounded-2xl px-5 py-5 space-y-4
+              ${countdown.expired ? 'border-zinc-700' : 'border-violet-500/20'}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-zinc-200">Buyer Inspection Window</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {countdown.expired
+                      ? 'Time has expired. Payment was auto-released to the seller.'
+                      : 'You have this time to raise a problem. After this, payment is auto-released.'}
+                  </p>
+                </div>
+              </div>
+
+              {!countdown.expired ? (
+                <div className="flex items-center gap-4">
+                  {/* Countdown clock */}
+                  {[
+                    { v: countdown.hours,   l: 'hrs'  },
+                    { v: countdown.minutes, l: 'min'  },
+                    { v: countdown.seconds, l: 'sec'  },
+                  ].map(({ v, l }, i) => (
+                    <div key={i} className="text-center">
+                      <div className="bg-surface-2 border border-violet-500/20 rounded-xl w-14 h-14 flex items-center justify-center">
+                        <span className="text-xl font-bold text-violet-400 font-mono tabular-nums">
+                          {String(v).padStart(2, '0')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-600 mt-1">{l}</p>
+                    </div>
+                  ))}
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => setShowDisputeForm(true)}
+                    className="btn-danger px-5 py-2.5 text-sm font-semibold shrink-0">
+                    🚨 Raise a Problem
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-4 py-3 text-sm text-emerald-400">
+                  ✅ Inspection window closed. Payment was auto-released to the seller.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Counterparty */}
           <div className="card rounded-2xl px-5 py-4">
@@ -255,15 +329,9 @@ const OrderDetail = ({ role = 'buyer' }) => {
             })()}
           </div>
 
-          {/* Actions */}
+          {/* Actions (seller ship / admin simulate) */}
           {!isTerminal && (
             <div className="flex flex-wrap gap-3">
-              {role === 'buyer' && escrowStatus === 'SHIPPED' && (
-                <button onClick={() => setDialog({ type: 'confirm_delivery' })}
-                  className="flex-1 btn-emerald py-3 text-sm">
-                  ✅ Confirm Delivery & Release Payment
-                </button>
-              )}
               {role === 'buyer' && escrowStatus === 'LOCKED' && (
                 <button onClick={() => setDialog({ type: 'cancel' })}
                   className="px-5 py-3 btn-danger text-sm">
@@ -272,12 +340,13 @@ const OrderDetail = ({ role = 'buyer' }) => {
               )}
               {role === 'seller' && escrowStatus === 'LOCKED' && (
                 <button onClick={() => setDialog({ type: 'ship' })} className="flex-1 btn-primary py-3">
-                  🚀 Generate Pathao Consignment & Dispatch
+                  🚀 Generate Pathao Consignment &amp; Dispatch
                 </button>
               )}
               {role === 'admin' && escrowStatus === 'SHIPPED' && (
-                <button onClick={() => setDialog({ type: 'simulate_delivery' })} className="w-full btn-primary py-3 bg-violet-600 hover:bg-violet-500">
-                  🧪 Simulate Pathao Delivery (Trigger Webhook)
+                <button onClick={() => setDialog({ type: 'simulate_delivery' })}
+                  className="w-full py-3 text-sm font-semibold rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition">
+                  🧪 Simulate Pathao Delivery (Admin)
                 </button>
               )}
             </div>
@@ -285,7 +354,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
 
           {/* Write review */}
           {role === 'buyer' && order && (
-            <WriteReview orderId={order._id} onSubmitted={() => { }} />
+            <WriteReview orderId={order._id} onSubmitted={() => {}} />
           )}
         </div>
 
@@ -297,13 +366,6 @@ const OrderDetail = ({ role = 'buyer' }) => {
 
       {/* Dialogs */}
       <AnimatePresence>
-        {dialog?.type === 'confirm_delivery' && (
-          <ConfirmDialog
-            title="Confirm Delivery?"
-            message={`This will release ৳${totalAmount.toLocaleString('en-BD')} to the seller's wallet. This cannot be undone.`}
-            onConfirm={() => handleAction('confirm_delivery')}
-            onCancel={() => setDialog(null)} loading={actionLoading} />
-        )}
         {dialog?.type === 'cancel' && (
           <ConfirmDialog title="Cancel this order?"
             message={`৳${totalAmount.toLocaleString('en-BD')} will be refunded to your wallet immediately.`}
@@ -311,20 +373,35 @@ const OrderDetail = ({ role = 'buyer' }) => {
             onCancel={() => setDialog(null)} loading={actionLoading} danger />
         )}
         {dialog?.type === 'ship' && (
-          <ConfirmDialog title="Mark as Shipped?"
-            message="Confirm you have dispatched this order. The buyer will be notified to confirm delivery."
+          <ConfirmDialog title="Dispatch via Pathao?"
+            message="Pathao will be notified to pick up the package. Confirm you have it ready."
             onConfirm={() => handleAction('ship')}
             onCancel={() => setDialog(null)} loading={actionLoading} />
         )}
         {dialog?.type === 'simulate_delivery' && (
           <ConfirmDialog title="Simulate Pathao Delivery?"
-            message="This will instantly trigger the delivery webhook, marking the order as Delivered and starting the 72-hour escrow countdown. Are you sure?"
+            message="Marks order as Delivered and starts the 24-hour buyer inspection countdown. For testing only."
             onConfirm={() => handleAction('simulate_delivery')}
             onCancel={() => setDialog(null)} loading={actionLoading} />
         )}
       </AnimatePresence>
 
-      {/* ── P2P Secure Chat ──────────────────────────────────── */}
+      {/* Dispute Form modal */}
+      <AnimatePresence>
+        {showDisputeForm && (
+          <DisputeForm
+            orderId={id}
+            onSuccess={() => {
+              setShowDisputeForm(false);
+              setSuccess('Dispute submitted! Payment is now on hold. Admin will review your video.');
+              fetchOrder();
+            }}
+            onCancel={() => setShowDisputeForm(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* P2P Secure Chat */}
       <OrderChat orderId={id} />
     </div>
   );

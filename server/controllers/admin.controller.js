@@ -707,37 +707,56 @@ const hideReview = async (req, res, next) => {
   }
 };
 /**
- * POST /api/admin/orders/:id/simulate-delivery
- * Manually transition a SHIPPED order to DELIVERED (Simulating Pathao Webhook).
+ * POST /api/admin/orders/:id/simulate-status
+ * Simulate any Pathao courier status change for sandbox testing.
+ * Body: { status: "Delivered" | "On_The_Way" | "Pickup_Requested" | ... }
  */
-const simulateDelivery = async (req, res, next) => {
+const simulateStatus = async (req, res, next) => {
   try {
+    const { status } = req.body;
+    if (!status) return next(ApiError.badRequest('status is required in the request body.'));
+
     const order = await Order.findById(req.params.id);
     if (!order) return next(ApiError.notFound('Order'));
 
-    if (order.escrowStatus !== 'SHIPPED') {
-      return next(ApiError.badRequest(`Cannot deliver order in ${order.escrowStatus} state.`));
+    const PATHAO_STATUS_LABELS = {
+      Pickup_Requested: 'Pickup Requested',
+      On_The_Way:       'In Transit',
+      Delivered:        'Delivered',
+      Partial_Delivery: 'Partial Delivery',
+      Return_In_Transit: 'Returning',
+      Returned:         'Returned to Seller',
+    };
+
+    const label = PATHAO_STATUS_LABELS[status] || status;
+    order.courierStatus = label;
+    order.courierStatusHistory.push({ status: label, timestamp: new Date() });
+
+    // If simulating Delivered, do the full escrow transition
+    if (status === 'Delivered' && order.escrowStatus === 'SHIPPED') {
+      const releaseDate = new Date();
+      releaseDate.setHours(releaseDate.getHours() + 24); // 24-hour window
+      const adminActor = { _id: req.user._id, role: 'admin' };
+      order.transitionEscrow('DELIVERED', adminActor, `Admin simulated Pathao status: ${status}`);
+      order.escrowReleaseDate = releaseDate;
     }
 
-    // Set escrow release date exactly 72 hours (3 days) forward
-    const releaseDate = new Date();
-    releaseDate.setHours(releaseDate.getHours() + 72);
-
-    // Use admin actor
-    const adminActor = { _id: req.user._id, role: 'admin' };
-    
-    order.transitionEscrow('DELIVERED', adminActor, 'Admin simulated delivery.');
-    order.escrowReleaseDate = releaseDate;
     await order.save();
 
     return res.status(200).json({
       status: 'success',
-      message: 'Order simulated as Delivered. Escrow countdown started.',
-      data: { releaseDate },
+      message: `Simulated Pathao status: "${label}"`,
+      data: { courierStatus: order.courierStatus, escrowStatus: order.escrowStatus },
     });
   } catch (err) {
     next(err);
   }
+};
+
+// Keep old simulateDelivery as an alias for backward compat
+const simulateDelivery = (req, res, next) => {
+  req.body.status = 'Delivered';
+  return simulateStatus(req, res, next);
 };
 
 module.exports = {
@@ -754,7 +773,9 @@ module.exports = {
   releaseOrder,
   refundOrder,
   simulateDelivery,
+  simulateStatus,
   banProduct,
   unbanProduct,
   hideReview,
 };
+

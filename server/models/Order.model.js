@@ -179,7 +179,25 @@ const orderSchema = new mongoose.Schema(
     deliveredAt: Date,
     releasedAt: Date,
     refundedAt: Date,
-    escrowReleaseDate: Date, // Scheduled date for automatic fund release (e.g. 72 hours after delivery)
+    // Scheduled date for automatic fund release (24 hours after Pathao delivery)
+    escrowReleaseDate: Date,
+
+    // ── Pathao Courier Live Tracking ──────────────────────────────
+    // Latest courier status fired by Pathao webhook
+    courierStatus: {
+      type: String,
+      default: '',
+    },
+
+    // Full history of every Pathao status update, for timeline display
+    courierStatusHistory: {
+      type: [{
+        status: String,
+        timestamp: { type: Date, default: Date.now },
+      }],
+      default: [],
+      _id: false,
+    },
 
     // ── Dispute ───────────────────────────────────────────────────
     disputeNote: {
