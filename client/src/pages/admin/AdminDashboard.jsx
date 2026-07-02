@@ -113,6 +113,11 @@ const AdminDashboard = () => {
                 className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/3 transition">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-zinc-200 font-mono">#{order._id.slice(-6).toUpperCase()}</p>
+                  {order.items?.length > 0 && (
+                    <p className="text-sm text-zinc-300 mt-0.5 truncate">
+                      {order.items.map(i => i.title).join(', ')}
+                    </p>
+                  )}
                   <p className="text-xs text-zinc-600 truncate mt-0.5">
                     {order.buyer?.name} → {order.seller?.sellerProfile?.shopName || order.seller?.name}
                   </p>

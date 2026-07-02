@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminApi } from '../../api/adminApi';
 
@@ -156,6 +157,18 @@ const AdminOrders = () => {
                         {order.escrowStatus}
                       </span>
                     </div>
+                    {order.items?.length > 0 && (
+                      <p className="text-sm font-medium text-zinc-300 mt-0.5 mb-1 truncate">
+                        {order.items.map((item, idx) => (
+                          <span key={idx}>
+                            <Link to={`/products/${item.product}`} className="hover:text-violet-400 hover:underline transition">
+                              {item.title}
+                            </Link>
+                            {idx < order.items.length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
+                      </p>
+                    )}
                     <p className="text-xs text-zinc-600 truncate">
                       <span className="text-zinc-500">{order.buyer?.name}</span>
                       {' → '}
