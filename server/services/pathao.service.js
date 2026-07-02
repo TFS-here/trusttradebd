@@ -65,13 +65,19 @@ class PathaoService {
     const rawAddress = order.shippingAddress.address || 'Dhaka';
     const safeAddress = rawAddress.length < 10 ? rawAddress.padEnd(10, '.') : rawAddress;
 
+    // Ensure phone is valid BD format for Pathao validation
+    let safePhone = order.shippingAddress.phone || '01811111111';
+    if (safePhone.length < 11 || !safePhone.startsWith('01')) {
+      safePhone = '01811111111';
+    }
+
     const payload = {
       store_id: parseInt(this.storeId),
       merchant_order_id: order._id.toString(),
       sender_name: seller.name || 'TrustTrade Seller',
       sender_phone: seller.phone || '01711111111',
       recipient_name: order.shippingAddress.fullName || 'Customer',
-      recipient_phone: order.shippingAddress.phone || '01811111111',
+      recipient_phone: safePhone,
       recipient_address: safeAddress,
       recipient_city: 1, // Defaulting to Dhaka city ID for Pathao
       recipient_zone: 1, // Defaulting to a specific zone ID
