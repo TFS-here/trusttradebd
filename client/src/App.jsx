@@ -42,6 +42,7 @@ const AdminLogin     = lazy(() => import('./pages/admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminUsers     = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminSellerProducts = lazy(() => import('./pages/admin/AdminSellerProducts'));
+const AdminUserDetails = lazy(() => import('./pages/admin/AdminUserDetails'));
 const AdminOrders    = lazy(() => import('./pages/admin/AdminOrders'));
 
 // ── Page transition ───────────────────────────────────────────────
@@ -228,6 +229,9 @@ const App = () => (
           } />
           <Route path="/admin/users"  element={
             <AdminRoute><AdminLayout><AdminUsers /></AdminLayout></AdminRoute>
+          } />
+          <Route path="/admin/users/:id"  element={
+            <AdminRoute><AdminLayout><AdminUserDetails /></AdminLayout></AdminRoute>
           } />
           <Route path="/admin/users/:id/products" element={
             <AdminRoute><AdminLayout><AdminSellerProducts /></AdminLayout></AdminRoute>
