@@ -207,8 +207,12 @@ const OrderDetail = ({ role = 'buyer' }) => {
                     <p className="font-mono text-sm font-semibold text-zinc-100">{trackingNumber}</p>
                   </div>
                 </div>
-                <a href={`https://pathao.com/bd/courier/track-parcel/?consignment_id=${trackingNumber}`} 
+                <a href="https://pathao.com/bd/courier/" 
                    target="_blank" rel="noreferrer"
+                   onClick={(e) => {
+                     navigator.clipboard.writeText(trackingNumber);
+                     alert('Tracking ID copied to clipboard! Paste it on the Pathao website.');
+                   }}
                    className="btn-primary py-1.5 px-3 text-xs bg-white/5 hover:bg-white/10 text-white border-0">
                   Track Parcel
                 </a>
