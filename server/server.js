@@ -26,11 +26,15 @@ const disputeRoutes = require('./routes/dispute.routes');
 
 const chatRoutes = require('./routes/chat.routes');
 const courierEscrowRoutes = require('./routes/courierEscrow.routes');
+const { startEscrowCronJob } = require('./controllers/courierEscrow.controller');
 
 const app = express();
 
 // ── Connect to Database ───────────────────────────────────────────
 connectDB();
+
+// ── Start Cron Jobs ───────────────────────────────────────────────
+startEscrowCronJob();
 
 // ── Security headers ──────────────────────────────────────────────
 app.use(helmet());

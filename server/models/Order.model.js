@@ -17,21 +17,28 @@ const mongoose = require('mongoose');
  *  RELEASED  : Funds transferred to seller wallet. Final state.
  *  ON_HOLD   : Admin flagged for dispute. No fund movement allowed.
  *  REFUNDED  : Admin issued refund. Funds returned to buyer. Final.
+ *  RETURNED  : Admin resolved dispute via return. Funds returned to buyer. Final.
  */
-const ESCROW_STATES = ['PENDING_PAYMENT', 'LOCKED', 'SHIPPED', 'DELIVERED', 'RELEASED', 'ON_HOLD', 'REFUNDED'];
+const ESCROW_STATES = [
+  'PENDING_PAYMENT',
+  'LOCKED',
+  'SHIPPED',
+  'DELIVERED',
+  'ON_HOLD',
+  'RELEASED',
+  'REFUNDED',
+  'RETURNED' // Terminal state for resolved disputes
+];
 
-/**
- * Valid state transitions. Only these moves are legal.
- * Controller must validate against this map before any state change.
- */
 const VALID_TRANSITIONS = {
-  PENDING_PAYMENT: ['LOCKED'],  // SSLCommerz payment verified → funds locked
-  LOCKED: ['SHIPPED', 'ON_HOLD'],
+  PENDING_PAYMENT: ['LOCKED'],
+  LOCKED: ['SHIPPED', 'REFUNDED'], // e.g., cancelled by buyer before shipping
   SHIPPED: ['DELIVERED', 'ON_HOLD'],
   DELIVERED: ['RELEASED', 'ON_HOLD'],
-  ON_HOLD: ['RELEASED', 'REFUNDED'],
+  ON_HOLD: ['RELEASED', 'REFUNDED', 'RETURNED'],
   RELEASED: [], // terminal
   REFUNDED: [], // terminal
+  RETURNED: [], // terminal
 };
 
 const orderItemSchema = new mongoose.Schema(

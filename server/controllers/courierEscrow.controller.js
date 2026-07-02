@@ -42,74 +42,64 @@ exports.pathaoWebhook = async (req, res, next) => {
   }
 };
 
+const cron = require('node-cron');
+
 /**
- * Vercel Cron Job Endpoint
+ * Cron Job Lifecycle
  * ─────────────────────────────────────────────────────────────────
- * Targeted by vercel.json cron configuration every hour.
- * Scans for orders where status === 'DELIVERED' 
+ * Runs every hour to scan for orders where status === 'DELIVERED' 
  * and escrowReleaseDate <= new Date().
  * Processes funds using atomic escrow release logic.
  */
-exports.autoReleaseEscrowCronEndpoint = async (req, res, next) => {
-  // Optional: Secure this endpoint by checking a secret key sent by Vercel
-  const authHeader = req.headers['authorization'];
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ status: 'fail', message: 'Unauthorized' });
-  }
+exports.startEscrowCronJob = () => {
+  // Run at the top of every hour: '0 * * * *'
+  cron.schedule('0 * * * *', async () => {
+    console.log('⏳ Running Escrow Auto-Release Cron Job...');
+    try {
+      const now = new Date();
+      
+      // Find orders that are DELIVERED and past their inspection window
+      const pendingReleaseOrders = await Order.find({
+        escrowStatus: 'DELIVERED',
+        escrowReleaseDate: { $lte: now }
+      });
 
-  console.log('⏳ Running Escrow Auto-Release (Vercel Cron Trigger)...');
-  try {
-    const now = new Date();
-    
-    // Find orders that are DELIVERED and past their inspection window
-    const pendingReleaseOrders = await Order.find({
-      escrowStatus: 'DELIVERED',
-      escrowReleaseDate: { $lte: now }
-    });
+      console.log(`Found ${pendingReleaseOrders.length} orders eligible for auto-release.`);
 
-    console.log(`Found ${pendingReleaseOrders.length} orders eligible for auto-release.`);
-    let processedCount = 0;
+      for (const order of pendingReleaseOrders) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+          // Re-fetch within session to lock
+          const lockedOrder = await Order.findById(order._id).session(session);
 
-    for (const order of pendingReleaseOrders) {
-      const session = await mongoose.startSession();
-      session.startTransaction();
-      try {
-        // Re-fetch within session to lock
-        const lockedOrder = await Order.findById(order._id).session(session);
+          // Atomic fund release (deducts from buyer escrow, credits seller wallet, takes platform fee)
+          const { sellerReceives, platformFee } = await releaseFunds(session, {
+            buyerId: lockedOrder.buyer,
+            sellerId: lockedOrder.seller,
+            amount: lockedOrder.totalAmount,
+            orderId: lockedOrder._id,
+            initiatedBy: null // System initiated
+          });
 
-        // Atomic fund release (deducts from buyer escrow, credits seller wallet, takes platform fee)
-        const { sellerReceives, platformFee } = await releaseFunds(session, {
-          buyerId: lockedOrder.buyer,
-          sellerId: lockedOrder.seller,
-          amount: lockedOrder.totalAmount,
-          orderId: lockedOrder._id,
-          initiatedBy: null // System initiated
-        });
-
-        lockedOrder.sellerReceives = sellerReceives;
-        lockedOrder.platformFee = platformFee;
-        
-        const systemActor = { _id: null, role: 'system' };
-        lockedOrder.transitionEscrow('RELEASED', systemActor, 'Cron: Inspection window expired (72h). Funds auto-released.');
-        
-        await lockedOrder.save({ session });
-        await session.commitTransaction();
-        processedCount++;
-        console.log(`✅ Auto-released order ${lockedOrder._id}`);
-      } catch (err) {
-        await session.abortTransaction();
-        console.error(`❌ Failed to auto-release order ${order._id}:`, err.message);
-      } finally {
-        session.endSession();
+          lockedOrder.sellerReceives = sellerReceives;
+          lockedOrder.platformFee = platformFee;
+          
+          const systemActor = { _id: null, role: 'system' };
+          lockedOrder.transitionEscrow('RELEASED', systemActor, 'Cron: Inspection window expired (72h). Funds auto-released.');
+          
+          await lockedOrder.save({ session });
+          await session.commitTransaction();
+          console.log(`✅ Auto-released order ${lockedOrder._id}`);
+        } catch (err) {
+          await session.abortTransaction();
+          console.error(`❌ Failed to auto-release order ${order._id}:`, err.message);
+        } finally {
+          session.endSession();
+        }
       }
+    } catch (error) {
+      console.error('Escrow Cron Job Error:', error);
     }
-
-    res.status(200).json({
-      status: 'success',
-      message: `Processed ${processedCount} orders for auto-release.`,
-    });
-  } catch (error) {
-    console.error('Escrow Cron Job Error:', error);
-    return next(new ApiError(error.message, 500));
-  }
+  });
 };

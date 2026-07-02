@@ -115,7 +115,7 @@ exports.resolveDisputeInBuyerFavor = async (req, res, next) => {
     );
 
     // Step 4: Update Order Status
-    order.transitionEscrow('REFUNDED', req.user, `Dispute resolved in buyer favor. Admin notes: ${adminNotes}`);
+    order.transitionEscrow('RETURNED', req.user, `Dispute resolved in buyer favor. Admin notes: ${adminNotes}`);
     await order.save({ session });
 
     // Step 5: Update Dispute Status
