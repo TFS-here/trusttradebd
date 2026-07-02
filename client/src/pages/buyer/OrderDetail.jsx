@@ -340,7 +340,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
               )}
               {role === 'seller' && escrowStatus === 'LOCKED' && (
                 <button onClick={() => setDialog({ type: 'ship' })} className="flex-1 btn-primary py-3">
-                  🚀 Generate Pathao Consignment &amp; Dispatch
+                  🚀 Ship Package
                 </button>
               )}
               {role === 'admin' && escrowStatus === 'SHIPPED' && (
