@@ -407,6 +407,23 @@ const handleIPN = async (req, res, next) => {
     // ── Commit the entire transaction ──────────────────────────
     await session.commitTransaction();
 
+    // Send confirmation email asynchronously
+    try {
+      const populated = await Order.findById(sessionOrder._id)
+        .populate('buyer', 'name email')
+        .populate('items.product', 'title');
+      
+      const frontendUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      const orderUrl = `${frontendUrl}/order/${sessionOrder._id}`;
+      
+      const { sendOrderConfirmationEmail } = require('../utils/sendEmail');
+      sendOrderConfirmationEmail(populated.buyer.email, populated.buyer.name, populated, orderUrl).catch(err => 
+        console.error('Failed to send order confirmation email:', err)
+      );
+    } catch (emailErr) {
+      console.error('[IPN] Email send error:', emailErr);
+    }
+
     console.log(
       `[IPN] ✅ Payment verified & escrowed. Order: ${sessionOrder._id}, ` +
       `Amount: ৳${sessionOrder.totalAmount}, TXN: ${sslTranId}`

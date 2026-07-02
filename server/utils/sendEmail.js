@@ -149,6 +149,67 @@ const buildResetPasswordHtml = (otp, name) => `
 </html>
 `;
 
+// ── HTML order confirmation template ──────────────────────────────
+const buildOrderConfirmationHtml = (name, order, orderUrl) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmation - TrustTrade BD</title>
+</head>
+<body style="margin:0;padding:0;background:#0d0d12;font-family:'Segoe UI',Arial,sans-serif;color:#e4e4e7;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d12;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:32px;max-width:600px;">
+          <tr>
+            <td align="center" style="padding-bottom:24px;">
+              <h2 style="margin:0;color:#f4f4f5;font-size:24px;font-weight:700;">Order Confirmed! 🎉</h2>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#a1a1aa;font-size:15px;line-height:1.6;">
+              Hi <strong style="color:#f4f4f5;">${name}</strong>,<br><br>
+              Thank you for your order! We've received your payment and your order is now confirmed.
+              <br><br>
+              <strong style="color:#f4f4f5;">Order ID:</strong> #${order._id.toString().slice(-8).toUpperCase()}<br>
+              <strong style="color:#f4f4f5;">Total Amount:</strong> ৳${order.totalAmount.toLocaleString('en-BD')}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #27272a;border-radius:8px;padding:16px;">
+                <tr>
+                  <td style="padding-bottom:8px;border-bottom:1px solid #27272a;color:#f4f4f5;font-weight:600;">Order Summary</td>
+                </tr>
+                ${order.items.map(item => `
+                <tr>
+                  <td style="padding:8px 0;color:#a1a1aa;font-size:14px;border-bottom:1px solid #27272a;">
+                    ${item.quantity}x ${item.title} <span style="float:right;color:#f4f4f5;">৳${(item.price * item.quantity).toLocaleString('en-BD')}</span>
+                  </td>
+                </tr>`).join('')}
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:24px 0;">
+              <a href="${orderUrl}" style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">View Order Details</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:#71717a;font-size:13px;text-align:center;">
+              If you have any questions, reply to this email or contact our support team.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
 // ── Main send function ────────────────────────────────────────────
 /**
  * Sends an OTP verification email.
@@ -200,4 +261,29 @@ const sendPasswordResetEmail = async (to, otp, name = 'there') => {
   return info;
 };
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+/**
+ * Sends an order confirmation email to the buyer.
+ * @param {string} to      - Recipient email address
+ * @param {string} name    - Buyer's display name
+ * @param {Object} order   - The order document
+ * @param {string} orderUrl - Direct link to the order page
+ */
+const sendOrderConfirmationEmail = async (to, name, order, orderUrl) => {
+  const transporter = await createTransporter();
+
+  const info = await transporter.sendMail({
+    from: `"TrustTrade BD" <${process.env.EMAIL_USER || 'noreply@trusttradebd.com'}>`,
+    to,
+    subject: `Order Confirmed! #${order._id.toString().slice(-8).toUpperCase()} - TrustTrade BD`,
+    text: `Hi ${name},\n\nThank you for your order! Your order #${order._id.toString().slice(-8).toUpperCase()} for ৳${order.totalAmount} has been confirmed.\n\nYou can view your order details here: ${orderUrl}`,
+    html: buildOrderConfirmationHtml(name, order, orderUrl),
+  });
+
+  if (!process.env.EMAIL_USER) {
+    console.log(`\n📧  [Order Confirmation Preview] Open in browser: ${nodemailer.getTestMessageUrl(info)}\n`);
+  }
+
+  return info;
+};
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendOrderConfirmationEmail };

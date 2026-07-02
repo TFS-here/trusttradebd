@@ -4,6 +4,7 @@ const Product = require('../models/Product.model');
 const User = require('../models/User.model');
 const { lockFunds, releaseFunds, refundFunds, PLATFORM_FEE_PERCENT } = require('../utils/escrow');
 const ApiError = require('../utils/apiError');
+const { sendOrderConfirmationEmail } = require('../utils/sendEmail');
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -225,6 +226,13 @@ const placeOrder = async (req, res, next) => {
     await session.commitTransaction();
 
     const populated = await populateOrder(Order.findById(order._id));
+
+    // Send confirmation email asynchronously
+    const frontendUrl = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+    const orderUrl = `${frontendUrl}/order/${order._id}`;
+    sendOrderConfirmationEmail(buyer.email, buyer.name, populated, orderUrl).catch(err => 
+      console.error('Failed to send order confirmation email:', err)
+    );
 
     return res.status(201).json({
       status: 'success',

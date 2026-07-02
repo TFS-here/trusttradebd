@@ -24,7 +24,7 @@ const ConfirmDialog = ({ title, message, onConfirm, onCancel, loading, danger = 
         <button onClick={onConfirm} disabled={loading}
           className={`flex-1 text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
                       ${danger ? 'bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30'
-                               : 'btn-primary'}`}>
+              : 'btn-primary'}`}>
           {loading ? 'Processing…' : 'Confirm'}
         </button>
       </div>
@@ -57,15 +57,15 @@ const useCountdown = (targetDate) => {
 
 const OrderDetail = ({ role = 'buyer' }) => {
   const { id } = useParams();
-  const [order, setOrder]           = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [actionLoading, setActLoad] = useState(false);
-  const [actionError, setActErr]    = useState('');
-  const [successMsg, setSuccess]    = useState('');
-  const [dialog, setDialog]         = useState(null);
-  const [trackingInput, setTracking]= useState('');
-  const [downloading, setDownload]  = useState(false);
+  const [actionError, setActErr] = useState('');
+  const [successMsg, setSuccess] = useState('');
+  const [dialog, setDialog] = useState(null);
+  const [trackingInput, setTracking] = useState('');
+  const [downloading, setDownload] = useState(false);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
 
   const fetchOrder = useCallback(async () => {
@@ -84,8 +84,8 @@ const OrderDetail = ({ role = 'buyer' }) => {
     setActLoad(true); setActErr(''); setSuccess('');
     try {
       let res;
-      if (action === 'cancel')      res = await orderApi.cancel(id);
-      else if (action === 'ship')   res = await orderApi.ship(id, { trackingNumber: trackingInput });
+      if (action === 'cancel') res = await orderApi.cancel(id);
+      else if (action === 'ship') res = await orderApi.ship(id, { trackingNumber: trackingInput });
       else if (action === 'simulate_delivery') {
         const token = localStorage.getItem('tt_admin_token');
         const raw = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/orders/${id}/simulate-status`, {
@@ -116,8 +116,8 @@ const OrderDetail = ({ role = 'buyer' }) => {
       );
       if (!res.ok) throw new Error('Failed');
       const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
       a.href = url; a.download = `TrustTrade-Receipt-${id.slice(-8).toUpperCase()}.pdf`;
       a.click(); URL.revokeObjectURL(url);
     } catch { console.error('Receipt download failed'); }
@@ -160,7 +160,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
           <h1 className="text-2xl font-bold text-zinc-100">Order Details</h1>
           <p className="text-sm text-zinc-600 mt-0.5">
             #{order._id.slice(-8).toUpperCase()} ·{' '}
-            {new Date(createdAt).toLocaleDateString('en-BD', { day:'numeric', month:'long', year:'numeric' })}
+            {new Date(createdAt).toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
         <button onClick={handleDownloadReceipt} disabled={downloading}
@@ -281,9 +281,9 @@ const OrderDetail = ({ role = 'buyer' }) => {
                 <div className="flex items-center gap-4">
                   {/* Countdown clock */}
                   {[
-                    { v: countdown.hours,   l: 'hrs'  },
-                    { v: countdown.minutes, l: 'min'  },
-                    { v: countdown.seconds, l: 'sec'  },
+                    { v: countdown.hours, l: 'hrs' },
+                    { v: countdown.minutes, l: 'min' },
+                    { v: countdown.seconds, l: 'sec' },
                   ].map(({ v, l }, i) => (
                     <div key={i} className="text-center">
                       <div className="bg-surface-2 border border-violet-500/20 rounded-xl w-14 h-14 flex items-center justify-center">
@@ -340,13 +340,13 @@ const OrderDetail = ({ role = 'buyer' }) => {
               )}
               {role === 'seller' && escrowStatus === 'LOCKED' && (
                 <button onClick={() => setDialog({ type: 'ship' })} className="flex-1 btn-primary py-3">
-                  🚀 Ship Package
+                  Ship Package
                 </button>
               )}
               {role === 'admin' && escrowStatus === 'SHIPPED' && (
                 <button onClick={() => setDialog({ type: 'simulate_delivery' })}
                   className="w-full py-3 text-sm font-semibold rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition">
-                  🧪 Simulate Pathao Delivery (Admin)
+                  Simulate Pathao Delivery (Admin)
                 </button>
               )}
             </div>
@@ -354,7 +354,7 @@ const OrderDetail = ({ role = 'buyer' }) => {
 
           {/* Write review */}
           {role === 'buyer' && order && (
-            <WriteReview orderId={order._id} onSubmitted={() => {}} />
+            <WriteReview orderId={order._id} onSubmitted={() => { }} />
           )}
         </div>
 
