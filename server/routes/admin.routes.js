@@ -17,6 +17,8 @@ const {
   banProduct,
   unbanProduct,
   hideReview,
+  getSettings,
+  updateSettings,
 } = require('../controllers/admin.controller');
 const { protect } = require('../middleware/auth.middleware');
 const { roleGuard } = require('../middleware/role.middleware');
@@ -58,5 +60,9 @@ router.patch('/products/:id/unban', unbanProduct);
 
 // ── Review moderation ─────────────────────────────────────────────
 router.patch('/reviews/:id/hide',   hideReview);
+
+// ── System settings ─────────────────────────────────────────────────
+router.get('/settings', getSettings);
+router.patch('/settings', updateSettings);
 
 module.exports = router;

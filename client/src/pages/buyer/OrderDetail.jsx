@@ -373,8 +373,8 @@ const OrderDetail = ({ role = 'buyer' }) => {
             onCancel={() => setDialog(null)} loading={actionLoading} danger />
         )}
         {dialog?.type === 'ship' && (
-          <ConfirmDialog title="Dispatch via Pathao?"
-            message="Pathao will be notified to pick up the package. Confirm you have it ready."
+          <ConfirmDialog title="Dispatch via Pathao (Sandbox Bypass)?"
+            message="Sandbox API is currently bypassed. A mock consignment ID will be generated and connected to the Admin Simulator."
             onConfirm={() => handleAction('ship')}
             onCancel={() => setDialog(null)} loading={actionLoading} />
         )}

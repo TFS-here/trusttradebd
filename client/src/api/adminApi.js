@@ -59,4 +59,8 @@ export const adminApi = {
     api.post(`/disputes/${disputeId}/resolve-buyer-favor`, data),
   resolveDisputeSellerFavor: (disputeId, data) =>
     api.post(`/disputes/${disputeId}/resolve-seller-favor`, data),
+
+  // Settings
+  getSettings: ()              => api.get('/admin/settings'),
+  updateSettings: (data)       => api.patch('/admin/settings', data),
 };

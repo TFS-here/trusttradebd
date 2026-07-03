@@ -46,6 +46,7 @@ const AdminUserDetails = lazy(() => import('./pages/admin/AdminUserDetails'));
 const AdminOrders    = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminDisputes  = lazy(() => import('./pages/admin/AdminDisputes'));
 const AdminSimulator = lazy(() => import('./pages/admin/AdminSimulator'));
+const AdminSettings  = lazy(() => import('./pages/admin/AdminSettings'));
 
 // ── Page transition ───────────────────────────────────────────────
 const PageTransition = ({ children }) => {
@@ -246,6 +247,9 @@ const App = () => (
           } />
           <Route path="/admin/simulator" element={
             <AdminRoute><AdminLayout><AdminSimulator /></AdminLayout></AdminRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <AdminRoute><AdminLayout><AdminSettings /></AdminLayout></AdminRoute>
           } />
 
           {/* ── 404 ───────────────────────────────────────────── */}

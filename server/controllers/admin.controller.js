@@ -4,6 +4,7 @@ const Product = require('../models/Product.model');
 const Order = require('../models/Order.model');
 const Transaction = require('../models/Transaction.model');
 const Review = require('../models/Review.model');
+const SystemSetting = require('../models/SystemSetting.model');
 const { generateToken } = require('../utils/generateToken');
 const { releaseFunds, refundFunds } = require('../utils/escrow');
 const ApiError = require('../utils/apiError');
@@ -753,6 +754,56 @@ const simulateStatus = async (req, res, next) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────
+// SYSTEM SETTINGS
+// ─────────────────────────────────────────────────────────────────
+
+const getSettings = async (req, res, next) => {
+  try {
+    let setting = await SystemSetting.findOne();
+    if (!setting) {
+      setting = await SystemSetting.create({ platformFeePercent: 2.5 });
+    }
+    return res.status(200).json({
+      status: 'success',
+      data: { settings: setting },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateSettings = async (req, res, next) => {
+  try {
+    const { platformFeePercent } = req.body;
+    
+    if (platformFeePercent !== undefined) {
+      if (typeof platformFeePercent !== 'number' || platformFeePercent < 0 || platformFeePercent > 100) {
+        return next(ApiError.badRequest('platformFeePercent must be a number between 0 and 100.'));
+      }
+    }
+
+    let setting = await SystemSetting.findOne();
+    if (!setting) {
+      setting = new SystemSetting();
+    }
+    
+    if (platformFeePercent !== undefined) {
+      setting.platformFeePercent = platformFeePercent;
+    }
+
+    await setting.save();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Settings updated successfully.',
+      data: { settings: setting },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Keep old simulateDelivery as an alias for backward compat
 const simulateDelivery = (req, res, next) => {
   req.body.status = 'Delivered';
@@ -777,5 +828,7 @@ module.exports = {
   banProduct,
   unbanProduct,
   hideReview,
+  getSettings,
+  updateSettings,
 };
 

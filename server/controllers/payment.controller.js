@@ -414,7 +414,7 @@ const handleIPN = async (req, res, next) => {
         .populate('items.product', 'title');
       
       const frontendUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-      const orderUrl = `${frontendUrl}/order/${sessionOrder._id}`;
+      const orderUrl = `${frontendUrl}/orders/${sessionOrder._id}`;
       
       const { sendOrderConfirmationEmail } = require('../utils/sendEmail');
       sendOrderConfirmationEmail(populated.buyer.email, populated.buyer.name, populated, orderUrl).catch(err => 

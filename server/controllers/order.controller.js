@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order.model');
 const Product = require('../models/Product.model');
 const User = require('../models/User.model');
-const { lockFunds, releaseFunds, refundFunds, PLATFORM_FEE_PERCENT } = require('../utils/escrow');
+const { lockFunds, releaseFunds, refundFunds, getPlatformFeePercent } = require('../utils/escrow');
 const ApiError = require('../utils/apiError');
 const { sendOrderConfirmationEmail } = require('../utils/sendEmail');
 
@@ -178,7 +178,8 @@ const placeOrder = async (req, res, next) => {
     }
 
     // ── Compute escrow financials ─────────────────────────────────
-    const platformFee = parseFloat(((totalAmount * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+    const percent = await getPlatformFeePercent();
+    const platformFee = parseFloat(((totalAmount * percent) / 100).toFixed(2));
     const sellerReceives = parseFloat((totalAmount - platformFee).toFixed(2));
 
     // ── Create the order ──────────────────────────────────────────
@@ -229,7 +230,7 @@ const placeOrder = async (req, res, next) => {
 
     // Send confirmation email asynchronously
     const frontendUrl = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
-    const orderUrl = `${frontendUrl}/order/${order._id}`;
+    const orderUrl = `${frontendUrl}/orders/${order._id}`;
     sendOrderConfirmationEmail(buyer.email, buyer.name, populated, orderUrl).catch(err => 
       console.error('Failed to send order confirmation email:', err)
     );
@@ -734,7 +735,8 @@ const createOrder = async (req, res, next) => {
     }
 
     // ── Compute financials ────────────────────────────────────────
-    const platformFee = parseFloat(((totalAmount * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+    const percent = await getPlatformFeePercent();
+    const platformFee = parseFloat(((totalAmount * percent) / 100).toFixed(2));
     const sellerReceives = parseFloat((totalAmount - platformFee).toFixed(2));
 
     // ── Fetch buyer for name/address defaults ─────────────────────

@@ -53,6 +53,12 @@ class PathaoService {
    * @param {Object} seller - The seller's details (for pickup info, if needed)
    */
   async createConsignment(order, seller) {
+    // ── Bypass Option for Sandbox ──
+    if (process.env.PATHAO_BYPASS === 'true') {
+      console.log(`[Pathao Bypass] Simulating consignment for Order ${order._id}`);
+      return `MOCK-${order._id.toString().slice(-6)}-${Date.now().toString().slice(-4)}`;
+    }
+
     if (!this.storeId) {
       throw new ApiError('PATHAO_STORE_ID is not configured in the environment', 500);
     }

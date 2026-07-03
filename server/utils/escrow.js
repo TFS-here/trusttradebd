@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction.model');
+const SystemSetting = require('../models/SystemSetting.model');
 
 /**
  * escrow.js — Atomic wallet operations for every escrow transition.
@@ -17,7 +18,13 @@ const Transaction = require('../models/Transaction.model');
  * Platform fee: PLATFORM_FEE_PERCENT is deducted from seller on RELEASED.
  */
 
-const PLATFORM_FEE_PERCENT = 2.5; // 2.5% platform cut
+const getPlatformFeePercent = async () => {
+  let setting = await SystemSetting.findOne();
+  if (!setting) {
+    setting = await SystemSetting.create({ platformFeePercent: 2.5 });
+  }
+  return setting.platformFeePercent;
+};
 
 /**
  * lockFunds
@@ -67,7 +74,8 @@ const lockFunds = async (session, { buyerId, amount, orderId }) => {
  * Returns: { sellerReceives, platformFee }
  */
 const releaseFunds = async (session, { buyerId, sellerId, amount, orderId, initiatedBy }) => {
-  const platformFee = parseFloat(((amount * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+  const percent = await getPlatformFeePercent();
+  const platformFee = parseFloat(((amount * percent) / 100).toFixed(2));
   const sellerReceives = parseFloat((amount - platformFee).toFixed(2));
 
   // Step 1: Release escrow hold from buyer
@@ -91,7 +99,7 @@ const releaseFunds = async (session, { buyerId, sellerId, amount, orderId, initi
     operation: 'increment',
     orderId,
     initiatedBy,
-    description: `Payment received for order #${orderId} (after ${PLATFORM_FEE_PERCENT}% fee)`,
+    description: `Payment received for order #${orderId} (after ${percent}% fee)`,
   });
 
   // Step 3: Record platform fee for analytics (no wallet mutation)
@@ -152,4 +160,4 @@ const refundFunds = async (session, { buyerId, amount, orderId, initiatedBy }) =
   return { refundTx };
 };
 
-module.exports = { lockFunds, releaseFunds, refundFunds, PLATFORM_FEE_PERCENT };
+module.exports = { lockFunds, releaseFunds, refundFunds, getPlatformFeePercent };
