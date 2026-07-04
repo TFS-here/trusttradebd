@@ -62,14 +62,36 @@ function generateReceiptPdf(order) {
       const tracking = order.trackingNumber || '';
 
       // --- Header ---
-      doc.font('Helvetica-Bold').fontSize(22).fillColor(BLUE).text('TrustTrade BD', 50, 50);
-      doc.font('Helvetica').fontSize(9).fillColor(GRAY_400).text('Secure Peer-to-Peer Marketplace', 50, 75);
+      // Draw new premium logo using SVG paths (scaled and translated)
+      const VIOLET = '#7C3AED';
+      const AMBER = '#F59E0B';
       
-      doc.font('Helvetica-Bold').fontSize(16).fillColor(GRAY_900).text('ORDER RECEIPT', 300, 50, { align: 'right' });
-      doc.font('Helvetica').fontSize(9).fillColor(GRAY_400).text(`#${orderShort}`, 300, 70, { align: 'right' });
+      doc.save()
+         .translate(45, 42) // Position of logo
+         .scale(0.5)        // Scale from 64x64 to 32x32 points
+         // Main shield
+         .path('M32 3 C32 3, 8 10, 8 10 C8 10, 8 34, 8 34 C8 46, 18 56, 32 62 C46 56, 56 46, 56 34 C56 34, 56 10, 56 10 C56 10, 32 3, 32 3Z')
+         .fill(VIOLET)
+         // First T (left)
+         .path('M18 20 L30 20 L30 24 L26.5 24 L26.5 44 L21.5 44 L21.5 24 L18 24 Z')
+         .fill(AMBER)
+         // Second T (right)
+         .path('M30 20 L44 20 L44 24 L39.5 24 L39.5 44 L34.5 44 L34.5 24 L30 24 Z')
+         .fillOpacity(0.85).fill(AMBER)
+         // Diamond accent
+         .path('M30.5 42 L32 39 L33.5 42 L32 45 Z')
+         .fillOpacity(0.7).fill(AMBER)
+         .restore();
 
-      // Blue divider line
-      doc.moveTo(50, 95).lineTo(545, 95).lineWidth(2).stroke(BLUE);
+      // Shift text slightly to the right to accommodate the 32px logo
+      doc.font('Helvetica-Bold').fontSize(22).fillColor(VIOLET).text('TrustTrade BD', 85, 48);
+      doc.font('Helvetica').fontSize(9).fillColor(GRAY_400).text('Secure Peer-to-Peer Marketplace', 85, 73);
+      
+      doc.font('Helvetica-Bold').fontSize(16).fillColor(GRAY_900).text('ORDER RECEIPT', 300, 48, { align: 'right' });
+      doc.font('Helvetica').fontSize(9).fillColor(GRAY_400).text(`#${orderShort}`, 300, 68, { align: 'right' });
+
+      // Divider line (matching violet)
+      doc.moveTo(45, 95).lineTo(545, 95).lineWidth(2).stroke(VIOLET);
 
       // --- STATUS BADGE ---
       let bgHex = '#F3F4F6';
