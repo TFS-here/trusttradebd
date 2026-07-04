@@ -1,4 +1,4 @@
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
@@ -97,9 +97,7 @@ const CartDrawer = ({ open, onClose }) => {
                   <span className="font-bold text-zinc-100 text-lg">৳{totalAmount.toLocaleString('en-BD')}</span>
                 </div>
                 <p className="text-xs text-emerald-400/80 flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                  </svg>
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   Payment held in escrow until you confirm delivery
                 </p>
                 <Link to="/checkout" state={{ cartItems: items, totalAmount }} onClick={onClose}

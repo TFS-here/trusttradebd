@@ -4,22 +4,19 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motio
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import CartDrawer from '../cart/CartDrawer';
+import LogoIcon from '../brand/LogoIcon';
 
 // ── Logo ──────────────────────────────────────────────────────────
 const Logo = () => (
   <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-    <div className="relative w-8 h-8">
-      <div className="absolute inset-0 bg-violet-500 rounded-xl blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
-      <div className="relative w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl flex items-center justify-center shadow-glow-violet">
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round"
-            d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-        </svg>
-      </div>
-    </div>
-    <div>
-      <span className="font-bold text-lg tracking-tight text-white">TrustTrade</span>
-      <span className="font-bold text-lg tracking-tight text-gradient-violet"> BD</span>
+    <LogoIcon size="md" />
+    <div className="flex flex-col leading-none">
+      <span className="font-extrabold text-lg tracking-tight text-white">
+        TrustTrade
+      </span>
+      <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-amber-400/80">
+        Bangladesh
+      </span>
     </div>
   </Link>
 );

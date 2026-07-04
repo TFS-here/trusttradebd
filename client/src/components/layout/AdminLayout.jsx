@@ -1,5 +1,6 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import LogoIcon from '../brand/LogoIcon';
 
 const NAV = [
   { label: 'Dashboard', to: '/admin/dashboard',
@@ -28,19 +29,11 @@ const AdminLayout = ({ children }) => {
 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/5">
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-7 h-7">
-              <div className="absolute inset-0 bg-violet-500 rounded-lg blur-sm opacity-60" />
-              <div className="relative w-7 h-7 bg-gradient-to-br from-violet-500 to-violet-700 rounded-lg flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm leading-none">TrustTrade</p>
-              <p className="text-violet-400 text-xs mt-0.5 font-medium">Admin Panel</p>
+          <div className="flex items-center gap-2.5 group">
+            <LogoIcon size="sm" />
+            <div className="flex flex-col leading-none">
+              <p className="text-white font-extrabold text-sm leading-none">TrustTrade</p>
+              <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
             </div>
           </div>
         </div>

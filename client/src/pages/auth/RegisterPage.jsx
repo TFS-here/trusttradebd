@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import LogoIcon from '../../components/brand/LogoIcon';
 
 // ── Lifted outside to prevent focus loss ─────────────────────────
 const RoleCard = ({ value, selectedRole, onSelect, title, description, icon }) => (
@@ -214,16 +215,12 @@ const RegisterPage = () => {
         transition={{ duration: 0.4 }} className="w-full max-w-md relative z-10">
 
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="relative w-10 h-10">
-              <div className="absolute inset-0 bg-violet-500 rounded-xl blur-md opacity-60" />
-              <div className="relative w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-              </div>
+          <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+            <LogoIcon size="lg" />
+            <div className="flex flex-col items-start leading-none">
+              <span className="font-extrabold text-2xl tracking-tight text-white">TrustTrade</span>
+              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-amber-400/80">Bangladesh</span>
             </div>
-            <span className="font-bold text-xl text-white">TrustTrade<span className="text-gradient-violet"> BD</span></span>
           </Link>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-zinc-500 mt-1 text-sm">Trade safely with escrow protection</p>

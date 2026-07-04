@@ -1,4 +1,4 @@
-import { Shield } from 'lucide-react';
+import LogoIcon from '../../components/brand/LogoIcon';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,9 +37,11 @@ const ForgotPasswordPage = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
-          <Link to="/" className="inline-block">
-            <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-2xl mb-4 mx-auto shadow-lg shadow-violet-500/20">
-              <Shield className="inline w-5 h-5 mr-1 align-text-bottom" />
+          <Link to="/" className="inline-flex items-center gap-2.5 mb-4 group">
+            <LogoIcon size="lg" />
+            <div className="flex flex-col items-start leading-none">
+              <span className="font-extrabold text-xl tracking-tight text-white">TrustTrade</span>
+              <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-amber-400/80">Bangladesh</span>
             </div>
           </Link>
           <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Reset Password</h1>
