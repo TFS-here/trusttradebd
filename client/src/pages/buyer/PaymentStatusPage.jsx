@@ -62,7 +62,7 @@ const PaymentStatusPage = () => {
                           ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-emerald-500/20' 
                           : 'bg-rose-500/10 border-rose-500/30 text-rose-400 shadow-rose-500/20'}`}
           >
-            {isSuccess ? '🎉' : '❌'}
+            {isSuccess ? '' : ''}
           </motion.div>
         </div>
 

@@ -145,7 +145,7 @@ const PlaceOrderPage = () => {
                 </svg>
                 Placing order…
               </span>
-            ) : `🔒 Place Order · ৳${total.toLocaleString('en-BD')}`}
+            ) : ` Place Order · ৳${total.toLocaleString('en-BD')}`}
           </button>
 
           <p className="text-xs text-center text-zinc-600">

@@ -1,3 +1,4 @@
+import { Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,7 +39,7 @@ const ForgotPasswordPage = () => {
         <div className="text-center space-y-2">
           <Link to="/" className="inline-block">
             <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-2xl mb-4 mx-auto shadow-lg shadow-violet-500/20">
-              🛡️
+              <Shield className="inline w-5 h-5 mr-1 align-text-bottom" />
             </div>
           </Link>
           <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Reset Password</h1>

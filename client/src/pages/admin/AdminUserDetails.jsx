@@ -1,3 +1,4 @@
+import { Star } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { adminApi } from '../../api/adminApi';
@@ -125,7 +126,7 @@ const AdminUserDetails = () => {
                 </div>
                 <div className="bg-surface-3 p-4 rounded-xl">
                   <p className="text-xs text-zinc-500">Rating</p>
-                  <p className="text-sm font-semibold text-amber-400 mt-1">★ {(user.sellerProfile.rating || 0).toFixed(1)}</p>
+                  <p className="text-sm font-semibold text-amber-400 mt-1"><Star className="inline w-5 h-5 mr-1 align-text-bottom" /> {(user.sellerProfile.rating || 0).toFixed(1)}</p>
                 </div>
               </div>
             </motion.div>

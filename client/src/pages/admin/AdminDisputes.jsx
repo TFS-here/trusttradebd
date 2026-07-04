@@ -1,3 +1,4 @@
+import { PartyPopper, Video, FileText } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminApi } from '../../api/adminApi';
@@ -104,7 +105,7 @@ const AdminDisputes = () => {
 
         {disputes.length === 0 ? (
           <div className="px-5 py-12 text-center text-zinc-600">
-            <p className="text-lg">🎉 No disputes found</p>
+            <p className="text-lg"><PartyPopper className="inline w-5 h-5 mr-1 align-text-bottom" /> No disputes found</p>
             <p className="text-sm mt-1">All transactions are clean.</p>
           </div>
         ) : (
@@ -211,7 +212,7 @@ const AdminDisputes = () => {
                   <p className="text-xs text-zinc-500 uppercase tracking-wider">Evidence</p>
                   {selected.unboxingVideoUrl && (
                     <div className="space-y-2">
-                      <p className="text-xs text-zinc-600">🎥 Unboxing Video</p>
+                      <p className="text-xs text-zinc-600"><Video className="inline w-5 h-5 mr-1 align-text-bottom" /> Unboxing Video</p>
                       <video
                         src={selected.unboxingVideoUrl}
                         controls
@@ -227,7 +228,7 @@ const AdminDisputes = () => {
                     <a href={selected.adminReportPdfUrl} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 
                                  px-3 py-2 rounded-xl text-xs font-medium hover:bg-amber-500/20 transition">
-                      📄 Admin Report PDF
+                      <FileText className="inline w-5 h-5 mr-1 align-text-bottom" /> Admin Report PDF
                     </a>
                   )}
                 </div>
@@ -264,14 +265,14 @@ const AdminDisputes = () => {
                       disabled={resolving || !resolveForm.adminNotes.trim()}
                       className="w-full text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
                                  bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30">
-                      {resolving ? 'Processing…' : '🔴 Rule in Buyer\'s Favor (Refund + Penalize Seller)'}
+                      {resolving ? 'Processing…' : ' Rule in Buyer\'s Favor (Refund + Penalize Seller)'}
                     </button>
                     <button
                       onClick={handleResolveSellerFavor}
                       disabled={resolving || !resolveForm.adminNotes.trim()}
                       className="w-full text-sm py-2.5 font-semibold rounded-xl transition disabled:opacity-60
                                  bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30">
-                      {resolving ? 'Processing…' : '🟢 Rule in Seller\'s Favor (Release Funds)'}
+                      {resolving ? 'Processing…' : ' Rule in Seller\'s Favor (Release Funds)'}
                     </button>
                     <button onClick={() => setSelected(null)} className="w-full btn-secondary text-sm py-2">
                       Cancel

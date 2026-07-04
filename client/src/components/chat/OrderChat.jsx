@@ -108,7 +108,7 @@ const OrderChat = ({ orderId }) => {
 
       await chatApi.sendMessage({ 
         orderId, 
-        text: text.trim() || (attachmentUrl ? '📷 Image' : ''), 
+        text: text.trim() || (attachmentUrl ? ' Image' : ''), 
         attachmentUrl 
       });
       

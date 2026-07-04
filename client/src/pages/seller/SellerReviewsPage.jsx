@@ -1,3 +1,4 @@
+import { CheckCircle, Package, Star, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { reviewApi } from '../../api/reviewApi';
@@ -48,7 +49,7 @@ const PendingQA = () => {
 
   if (questions.length === 0) return (
     <div className="text-center py-16">
-      <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4">✅</div>
+      <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4"><CheckCircle className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
       <p className="font-semibold text-zinc-400">All questions answered!</p>
       <p className="text-sm text-zinc-600 mt-1">New questions from buyers will appear here.</p>
     </div>
@@ -73,7 +74,7 @@ const PendingQA = () => {
               </div>
               <p className="text-sm text-zinc-400">{q.question}</p>
               {q.product && (
-                <p className="text-xs text-violet-400 mt-1 truncate">📦 {q.product.title}</p>
+                <p className="text-xs text-violet-400 mt-1 truncate"><Package className="inline w-5 h-5 mr-1 align-text-bottom" /> {q.product.title}</p>
               )}
             </div>
           </div>
@@ -127,7 +128,7 @@ const ReviewsPanel = ({ user }) => {
 
   if (reviews.length === 0) return (
     <div className="text-center py-16">
-      <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4">⭐</div>
+      <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4"><Star className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
       <p className="font-semibold text-zinc-400">No reviews yet</p>
       <p className="text-sm text-zinc-600 mt-1">Reviews will appear here once buyers rate your products.</p>
     </div>
@@ -153,7 +154,7 @@ const ReviewsPanel = ({ user }) => {
               </div>
               <p className="text-sm text-zinc-400 mt-2 leading-relaxed">{review.comment}</p>
               {review.product && (
-                <p className="text-xs text-violet-400 mt-1 truncate">📦 {review.product.title}</p>
+                <p className="text-xs text-violet-400 mt-1 truncate"><Package className="inline w-5 h-5 mr-1 align-text-bottom" /> {review.product.title}</p>
               )}
             </div>
           </div>
@@ -226,14 +227,14 @@ const SellerReviewsPage = () => {
                       ${activeTab === 'reviews'
                         ? 'bg-surface-0 text-zinc-100 shadow-sm border border-white/8'
                         : 'text-zinc-600 hover:text-zinc-400'}`}>
-          ⭐ Reviews
+          <Star className="inline w-5 h-5 mr-1 align-text-bottom" /> Reviews
         </button>
         <button onClick={() => setActiveTab('qa')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
                       ${activeTab === 'qa'
                         ? 'bg-surface-0 text-zinc-100 shadow-sm border border-white/8'
                         : 'text-zinc-600 hover:text-zinc-400'}`}>
-          💬 Pending Questions
+          <MessageSquare className="inline w-5 h-5 mr-1 align-text-bottom" /> Pending Questions
         </button>
       </div>
 

@@ -1,14 +1,15 @@
+import { Radio, Mailbox } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminApi } from '../../api/adminApi';
 
 const PATHAO_STATUSES = [
-  { key: 'Pickup_Requested', label: '📦 Pickup Requested', color: 'amber' },
-  { key: 'On_The_Way',       label: '🚚 In Transit',       color: 'blue'  },
-  { key: 'Delivered',        label: '✅ Delivered',         color: 'emerald' },
-  { key: 'Partial_Delivery', label: '⚠️ Partial Delivery',  color: 'orange' },
+  { key: 'Pickup_Requested', label: ' Pickup Requested', color: 'amber' },
+  { key: 'On_The_Way',       label: ' In Transit',       color: 'blue'  },
+  { key: 'Delivered',        label: ' Delivered',         color: 'emerald' },
+  { key: 'Partial_Delivery', label: ' Partial Delivery',  color: 'orange' },
   { key: 'Return_In_Transit',label: '↩️ Returning',         color: 'rose'  },
-  { key: 'Returned',         label: '🔙 Returned to Seller',color: 'rose'  },
+  { key: 'Returned',         label: ' Returned to Seller',color: 'rose'  },
 ];
 
 const COLOR_CLASSES = {
@@ -79,7 +80,7 @@ const AdminSimulator = () => {
 
       {/* Info box */}
       <div className="bg-violet-500/10 border border-violet-500/20 rounded-2xl px-5 py-4 text-sm text-zinc-400 leading-relaxed">
-        <p className="font-semibold text-violet-400 mb-1">📡 How this works</p>
+        <p className="font-semibold text-violet-400 mb-1"><Radio className="inline w-5 h-5 mr-1 align-text-bottom" /> How this works</p>
         <p>In production, Pathao automatically sends these status updates to your webhook as the courier moves through the delivery lifecycle. In Sandbox mode, you use this panel to manually trigger each step to test the full buyer experience.</p>
       </div>
 
@@ -92,7 +93,7 @@ const AdminSimulator = () => {
         </div>
       ) : orders.length === 0 ? (
         <div className="card rounded-2xl px-5 py-16 text-center">
-          <p className="text-3xl mb-3">📭</p>
+          <p className="text-3xl mb-3"><Mailbox className="inline w-5 h-5 mr-1 align-text-bottom" /></p>
           <p className="text-zinc-400 font-medium">No shipped orders to simulate</p>
           <p className="text-sm text-zinc-600 mt-1">Orders must be in SHIPPED state to appear here.</p>
         </div>
@@ -158,7 +159,7 @@ const AdminSimulator = () => {
                       className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition disabled:opacity-50
                         ${COLOR_CLASSES[color]}`}
                     >
-                      {busy[busyKey] ? '⏳ Sending…' : label}
+                      {busy[busyKey] ? ' Sending…' : label}
                     </button>
                   );
                 })}

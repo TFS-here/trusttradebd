@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../../hooks/useProduct';
@@ -6,16 +7,16 @@ import ProductCard from '../../components/product/ProductCard';
 
 const CATEGORIES = [
   { value: '', label: 'All' },
-  { value: 'electronics',  label: '📱 Electronics' },
-  { value: 'clothing',     label: '👕 Clothing' },
-  { value: 'books',        label: '📚 Books' },
-  { value: 'home',         label: '🏠 Home' },
-  { value: 'sports',       label: '⚽ Sports' },
-  { value: 'beauty',       label: '💄 Beauty' },
-  { value: 'food',         label: '🍜 Food' },
-  { value: 'toys',         label: '🧸 Toys' },
-  { value: 'automotive',   label: '🚗 Automotive' },
-  { value: 'other',        label: '📦 Other' },
+  { value: 'electronics',  label: ' Electronics' },
+  { value: 'clothing',     label: ' Clothing' },
+  { value: 'books',        label: ' Books' },
+  { value: 'home',         label: ' Home' },
+  { value: 'sports',       label: ' Sports' },
+  { value: 'beauty',       label: ' Beauty' },
+  { value: 'food',         label: ' Food' },
+  { value: 'toys',         label: ' Toys' },
+  { value: 'automotive',   label: ' Automotive' },
+  { value: 'other',        label: ' Other' },
 ];
 
 const SORT_OPTIONS = [
@@ -166,7 +167,7 @@ const HomePage = () => {
       {/* ── Empty ─────────────────────────────────────────────── */}
       {!loading && !error && products.length === 0 && (
         <div className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4">🔍</div>
+          <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4"><Search className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
           <h3 className="font-semibold text-zinc-400 text-lg">No products found</h3>
           <p className="text-zinc-600 text-sm mt-1">Try adjusting your search or filters</p>
         </div>

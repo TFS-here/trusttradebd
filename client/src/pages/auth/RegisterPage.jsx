@@ -1,3 +1,4 @@
+import { Mail } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -258,10 +259,10 @@ const RegisterPage = () => {
               exit={{ opacity: 0, x: -20 }} className="card-glass rounded-2xl p-6 space-y-4">
               <p className="text-sm font-medium text-zinc-400 text-center">I want to…</p>
               <RoleCard value="buyer" selectedRole={role} onSelect={v => { setRole(v); setStep(2); }}
-                title="Shop as a Buyer" icon="🛍️"
+                title="Shop as a Buyer" icon=""
                 description="Browse products, order securely, and pay only when you receive your items." />
               <RoleCard value="seller" selectedRole={role} onSelect={v => { setRole(v); setStep(2); }}
-                title="Sell as a Seller" icon="🏪"
+                title="Sell as a Seller" icon=""
                 description="List products, manage orders, and get paid safely through escrow." />
               <p className="text-center text-sm text-zinc-600 pt-2">
                 Already have an account?{' '}
@@ -338,7 +339,7 @@ const RegisterPage = () => {
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   className="w-16 h-16 rounded-2xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-3xl shadow-[0_0_24px_rgba(139,92,246,0.2)]"
                 >
-                  📧
+                  <Mail className="inline w-5 h-5 mr-1 align-text-bottom" />
                 </motion.div>
               </div>
 
@@ -393,7 +394,7 @@ const RegisterPage = () => {
                       </svg>
                       Verifying…
                     </span>
-                  ) : '✓ Verify email'}
+                  ) : ' Verify email'}
                 </button>
               </form>
 

@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion';
 
 const MAIN_STEPS = [
-  { key: 'LOCKED',    label: 'Order Placed',      sublabel: r => r==='seller' ? 'Prepare to ship' : 'Funds secured in escrow',   icon: '🔒' },
-  { key: 'SHIPPED',   label: 'Shipped',            sublabel: r => r==='seller' ? 'Tracking shared' : 'Your order is on its way',   icon: '📦' },
-  { key: 'DELIVERED', label: 'Delivered',          sublabel: () => 'Buyer confirmed receipt',                                      icon: '✅' },
-  { key: 'RELEASED',  label: 'Payment Released',   sublabel: r => r==='seller' ? 'Funds in your wallet' : 'Transaction complete',  icon: '💳' },
+  { key: 'LOCKED',    label: 'Order Placed',      sublabel: r => r==='seller' ? 'Prepare to ship' : 'Funds secured in escrow',   icon: '' },
+  { key: 'SHIPPED',   label: 'Shipped',            sublabel: r => r==='seller' ? 'Tracking shared' : 'Your order is on its way',   icon: '' },
+  { key: 'DELIVERED', label: 'Delivered',          sublabel: () => 'Buyer confirmed receipt',                                      icon: '' },
+  { key: 'RELEASED',  label: 'Payment Released',   sublabel: r => r==='seller' ? 'Funds in your wallet' : 'Transaction complete',  icon: '' },
 ];
 
 const EXCEPTION = {
-  ON_HOLD:  { label: 'Dispute / On Hold', color: 'amber',   icon: '⚠️' },
+  ON_HOLD:  { label: 'Dispute / On Hold', color: 'amber',   icon: '' },
   REFUNDED: { label: 'Refunded',          color: 'rose',    icon: '↩️' },
 };
 

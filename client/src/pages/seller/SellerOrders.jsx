@@ -1,3 +1,4 @@
+import { Mailbox } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -62,7 +63,7 @@ const SellerOrders = () => {
 
         {!loading && orders.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4">📭</div>
+            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4"><Mailbox className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
             <p className="text-zinc-600">No orders yet.</p>
           </div>
         )}

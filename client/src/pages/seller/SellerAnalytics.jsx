@@ -71,10 +71,10 @@ const SellerAnalytics = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Total Revenue" value={`৳${totalRevenue.toLocaleString('en-BD')}`} icon="💰" bg="text-emerald-400" />
-        <MetricCard title="Total Orders" value={totalOrders} icon="📦" bg="text-violet-400" />
-        <MetricCard title="Completed" value={completedOrders} icon="✅" bg="text-blue-400" />
-        <MetricCard title="Pending" value={pendingOrders} icon="⏳" bg="text-amber-400" />
+        <MetricCard title="Total Revenue" value={`৳${totalRevenue.toLocaleString('en-BD')}`} icon="" bg="text-emerald-400" />
+        <MetricCard title="Total Orders" value={totalOrders} icon="" bg="text-violet-400" />
+        <MetricCard title="Completed" value={completedOrders} icon="" bg="text-blue-400" />
+        <MetricCard title="Pending" value={pendingOrders} icon="" bg="text-amber-400" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

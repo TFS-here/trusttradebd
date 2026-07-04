@@ -1,19 +1,20 @@
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { productApi } from '../../api/productApi';
 
 const CATEGORIES = [
-  { value: 'electronics', label: '📱 Electronics' },
-  { value: 'clothing',    label: '👕 Clothing' },
-  { value: 'books',       label: '📚 Books' },
-  { value: 'home',        label: '🏠 Home' },
-  { value: 'sports',      label: '⚽ Sports' },
-  { value: 'beauty',      label: '💄 Beauty' },
-  { value: 'food',        label: '🍜 Food' },
-  { value: 'toys',        label: '🧸 Toys' },
-  { value: 'automotive',  label: '🚗 Automotive' },
-  { value: 'other',       label: '📦 Other' },
+  { value: 'electronics', label: ' Electronics' },
+  { value: 'clothing',    label: ' Clothing' },
+  { value: 'books',       label: ' Books' },
+  { value: 'home',        label: ' Home' },
+  { value: 'sports',      label: ' Sports' },
+  { value: 'beauty',      label: ' Beauty' },
+  { value: 'food',        label: ' Food' },
+  { value: 'toys',        label: ' Toys' },
+  { value: 'automotive',  label: ' Automotive' },
+  { value: 'other',       label: ' Other' },
 ];
 
 // Lifted out to prevent focus loss
@@ -63,7 +64,7 @@ const ImageInput = ({ index, value, onChange, onRemove }) => {
       {index > 0 && (
         <button type="button" onClick={() => onRemove(index)}
           className="px-3 py-2 rounded-xl border border-white/8 text-zinc-600 hover:border-rose-500/30 hover:text-rose-400 transition shrink-0">
-          ✕
+          <X className="inline w-5 h-5 mr-1 align-text-bottom" />
         </button>
       )}
     </div>

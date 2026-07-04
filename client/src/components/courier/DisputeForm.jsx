@@ -1,3 +1,4 @@
+import { Siren } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -89,7 +90,7 @@ const DisputeForm = ({ orderId, onSuccess, onCancel }) => {
       >
         {/* Header */}
         <div>
-          <h3 className="text-lg font-bold text-zinc-100">🚨 Raise a Problem</h3>
+          <h3 className="text-lg font-bold text-zinc-100"><Siren className="inline w-5 h-5 mr-1 align-text-bottom" /> Raise a Problem</h3>
           <p className="text-sm text-zinc-500 mt-1">
             Describe the issue and upload your unboxing video. Without a video, disputes cannot be accepted.
           </p>
@@ -132,13 +133,13 @@ const DisputeForm = ({ orderId, onSuccess, onCancel }) => {
               />
               {videoFile ? (
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-violet-400">📹 {videoFile.name}</p>
+                  <p className="text-sm font-medium text-violet-400"> {videoFile.name}</p>
                   <p className="text-xs text-zinc-600">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</p>
                   <p className="text-xs text-zinc-500">Click to change</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <div className="text-3xl">🎥</div>
+                  <div className="text-3xl"></div>
                   <p className="text-sm text-zinc-400">Click to select your unboxing video</p>
                   <p className="text-xs text-zinc-600">MP4, MOV, WebM — up to 100MB</p>
                 </div>
@@ -165,7 +166,7 @@ const DisputeForm = ({ orderId, onSuccess, onCancel }) => {
 
           {/* Warning box */}
           <div className="bg-amber-400/10 border border-amber-400/20 rounded-xl px-4 py-3 text-xs text-amber-400 leading-relaxed">
-            ⚠️ Your payment will be <strong>held</strong> while we review your dispute. Our admin will watch your unboxing video and decide within 24–72 hours.
+             Your payment will be <strong>held</strong> while we review your dispute. Our admin will watch your unboxing video and decide within 24–72 hours.
           </div>
 
           {/* Error */}

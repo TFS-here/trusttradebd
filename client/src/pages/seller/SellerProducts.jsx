@@ -1,3 +1,4 @@
+import { Package, Check } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,7 +142,7 @@ const SellerProducts = () => {
 
       {!loading && !error && products.length === 0 && (
         <div className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4">📦</div>
+          <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl mx-auto mb-4"><Package className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
           <h3 className="font-semibold text-zinc-400">No products yet</h3>
           <p className="text-sm text-zinc-600 mt-1">Create your first listing to start selling.</p>
           <Link to="/seller/products/new" className="mt-4 inline-block text-violet-400 hover:text-violet-300 text-sm">Create a product →</Link>
@@ -168,7 +169,7 @@ const SellerProducts = () => {
                 {feedback[product._id] && (
                   <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="text-xs text-emerald-400 font-medium shrink-0">
-                    ✓ {feedback[product._id]}
+                    <Check className="inline w-5 h-5 mr-1 align-text-bottom" /> {feedback[product._id]}
                   </motion.span>
                 )}
               </AnimatePresence>

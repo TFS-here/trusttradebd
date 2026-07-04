@@ -140,7 +140,7 @@ const ReviewSection = ({ productId, avgRating = 0, reviewCount = 0, sellerId }) 
 
   if (reviewCount === 0) return (
     <div className="py-8 text-center">
-      <p className="text-2xl mb-2">✍️</p>
+      <p className="text-2xl mb-2"></p>
       <p className="text-zinc-600 text-sm">No reviews yet. Be the first!</p>
     </div>
   );
@@ -169,7 +169,7 @@ const ReviewSection = ({ productId, avgRating = 0, reviewCount = 0, sellerId }) 
           {starFilter && (
             <button onClick={() => { setStarFilter(''); setPage(1); }}
               className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-400 font-medium">
-              ★ {starFilter} only
+               {starFilter} only
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>

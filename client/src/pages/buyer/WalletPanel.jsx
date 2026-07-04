@@ -1,3 +1,4 @@
+import { Lightbulb, PartyPopper, Lock } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -132,7 +133,7 @@ const WithdrawForm = ({ availableBalance, onSuccess }) => {
         </button>
       </div>
       {error && <p className="text-xs text-rose-400">{error}</p>}
-      <p className="text-xs text-zinc-700">💡 In a real system this transfers to your bank/bKash account.</p>
+      <p className="text-xs text-zinc-700"><Lightbulb className="inline w-5 h-5 mr-1 align-text-bottom" /> In a real system this transfers to your bank/bKash account.</p>
     </div>
   );
 };
@@ -239,7 +240,7 @@ const WalletPanel = () => {
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(16,185,129,0.3)]"
                 >
-                  🎉
+                  <PartyPopper className="inline w-5 h-5 mr-1 align-text-bottom" />
                 </motion.div>
               </div>
               <h2 className="text-2xl font-bold text-white mb-2 relative z-10">Congratulations!</h2>
@@ -275,7 +276,7 @@ const WalletPanel = () => {
 
         {wallet?.escrowBalance > 0 && (
           <div className="mt-3 pt-3 border-t border-violet-400/20 flex items-center gap-2 relative z-10">
-            <span className="text-violet-300 text-xs">🔒 In escrow:</span>
+            <span className="text-violet-300 text-xs"><Lock className="inline w-5 h-5 mr-1 align-text-bottom" /> In escrow:</span>
             <span className="text-white font-semibold text-sm">৳{wallet.escrowBalance.toLocaleString('en-BD')}</span>
           </div>
         )}
@@ -324,7 +325,7 @@ const WalletPanel = () => {
             exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="card rounded-2xl p-5">
               <h3 className="font-semibold text-zinc-200 mb-4">
-                {activeTab === 'deposit' ? '💳 Add Money' : '💸 Withdraw Money'}
+                {activeTab === 'deposit' ? ' Add Money' : ' Withdraw Money'}
               </h3>
               {activeTab === 'deposit'
                 ? <DepositForm onSuccess={handleSuccess} />

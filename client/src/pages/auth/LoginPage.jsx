@@ -1,3 +1,4 @@
+import { Mail } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -88,7 +89,7 @@ const LoginPage = () => {
                 }`}>
                 {unverified ? (
                   <span>
-                    ✉️ Your email isn't verified yet.{' '}
+                    <Mail className="inline w-5 h-5 mr-1 align-text-bottom" /> Your email isn't verified yet.{' '}
                     <Link to="/register" className="underline underline-offset-2 font-medium hover:text-amber-300 transition-colors">
                       Complete verification
                     </Link>

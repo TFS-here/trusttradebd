@@ -1,3 +1,4 @@
+import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
@@ -74,7 +75,7 @@ const CartDrawer = ({ open, onClose }) => {
             <div className="flex-1 overflow-y-auto px-5">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-12 gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl">🛒</div>
+                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-white/5 flex items-center justify-center text-3xl"><ShoppingCart className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
                   <div>
                     <p className="font-semibold text-zinc-300">Your cart is empty</p>
                     <p className="text-sm text-zinc-600 mt-1">Add products to start shopping</p>

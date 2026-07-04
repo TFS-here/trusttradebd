@@ -1,10 +1,11 @@
+import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // The ordered steps of a Pathao delivery lifecycle
 const COURIER_STEPS = [
-  { key: 'Pickup Requested', label: 'Pickup Requested',   icon: '📦' },
-  { key: 'In Transit',       label: 'In Transit',         icon: '🚚' },
-  { key: 'Delivered',        label: 'Delivered',          icon: '✅' },
+  { key: 'Pickup Requested', label: 'Pickup Requested',   icon: '' },
+  { key: 'In Transit',       label: 'In Transit',         icon: '' },
+  { key: 'Delivered',        label: 'Delivered',          icon: '' },
 ];
 
 // Non-standard / return statuses shown as a separate warning badge
@@ -52,7 +53,7 @@ const CourierStatusTimeline = ({ courierStatus, courierStatusHistory = [] }) => 
       {/* Return warning */}
       {isReturnStatus && (
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3 text-sm text-rose-400">
-          ⚠️ This parcel is being returned to the seller. Please contact support.
+          <AlertTriangle className="inline w-5 h-5 mr-1 align-text-bottom" /> This parcel is being returned to the seller. Please contact support.
         </div>
       )}
 
@@ -86,7 +87,7 @@ const CourierStatusTimeline = ({ courierStatus, courierStatusHistory = [] }) => 
                     : isActive  ? 'bg-violet-500/20 border-2 border-violet-500 text-violet-400 shadow-lg shadow-violet-500/20'
                     : 'bg-surface-2 border-2 border-white/10 text-zinc-600'}`}
                 >
-                  {isDone ? '✓' : step.icon}
+                  {isDone ? '' : step.icon}
                 </motion.div>
                 <p className={`text-xs text-center font-medium leading-tight
                   ${isDone ? 'text-emerald-400' : isActive ? 'text-violet-400' : 'text-zinc-600'}`}>

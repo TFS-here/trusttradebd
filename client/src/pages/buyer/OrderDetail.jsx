@@ -1,3 +1,4 @@
+import { Siren, CheckCircle } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -298,12 +299,12 @@ const OrderDetail = ({ role = 'buyer' }) => {
                   <button
                     onClick={() => setShowDisputeForm(true)}
                     className="btn-danger px-5 py-2.5 text-sm font-semibold shrink-0">
-                    🚨 Raise a Problem
+                    <Siren className="inline w-5 h-5 mr-1 align-text-bottom" /> Raise a Problem
                   </button>
                 </div>
               ) : (
                 <div className="bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-4 py-3 text-sm text-emerald-400">
-                  ✅ Inspection window closed. Payment was auto-released to the seller.
+                  <CheckCircle className="inline w-5 h-5 mr-1 align-text-bottom" /> Inspection window closed. Payment was auto-released to the seller.
                 </div>
               )}
             </div>

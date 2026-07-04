@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -192,7 +193,7 @@ const AdminOrders = () => {
                   <AnimatePresence>
                     {feedback[order._id] && (
                       <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="text-xs text-emerald-400 font-medium shrink-0">✓ {feedback[order._id]}</motion.span>
+                        className="text-xs text-emerald-400 font-medium shrink-0"><Check className="inline w-5 h-5 mr-1 align-text-bottom" /> {feedback[order._id]}</motion.span>
                     )}
                   </AnimatePresence>
                   {isActionable && (

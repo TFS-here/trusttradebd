@@ -1,3 +1,4 @@
+import { ShoppingBag } from 'lucide-react';
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -111,7 +112,7 @@ const BuyerOrderList = () => {
       ))}
       {!loading && orders.length === 0 && (
         <div className="text-center py-16">
-          <div className="text-4xl mb-3">🛍️</div>
+          <div className="text-4xl mb-3"><ShoppingBag className="inline w-5 h-5 mr-1 align-text-bottom" /></div>
           <p className="text-gray-500">You haven't placed any orders yet.</p>
           <Link to="/" className="mt-3 inline-block text-blue-600 hover:underline text-sm">
             Browse products →

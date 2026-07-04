@@ -1,3 +1,4 @@
+import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -153,7 +154,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-semibold text-zinc-100">{seller.sellerProfile?.totalSales} sales</p>
-                  <p className="text-xs text-amber-400">★ {seller.sellerProfile?.rating?.toFixed(1) || '—'}</p>
+                  <p className="text-xs text-amber-400"><Star className="inline w-5 h-5 mr-1 align-text-bottom" /> {seller.sellerProfile?.rating?.toFixed(1) || '—'}</p>
                 </div>
               </Link>
             ))}

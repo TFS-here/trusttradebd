@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { qaApi } from '../../api/qaApi';
@@ -85,7 +86,7 @@ const QuestionCard = ({ q, isSeller, currentUserId, onUpdate, onDelete }) => {
               </span>
             </div>
             {(isMyQ || isSeller) && (
-              <button onClick={() => onDelete(q._id)} className="text-xs text-zinc-700 hover:text-rose-400 transition shrink-0">✕</button>
+              <button onClick={() => onDelete(q._id)} className="text-xs text-zinc-700 hover:text-rose-400 transition shrink-0"><X className="inline w-5 h-5 mr-1 align-text-bottom" /></button>
             )}
           </div>
           <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{q.question}</p>
@@ -210,7 +211,7 @@ const QASection = ({ productId, sellerId }) => {
           </div>
         ) : questions.length === 0 ? (
           <div className="py-10 text-center">
-            <p className="text-2xl mb-2">💬</p>
+            <p className="text-2xl mb-2"></p>
             <p className="text-zinc-600 text-sm">No questions yet. Be the first to ask!</p>
           </div>
         ) : (
