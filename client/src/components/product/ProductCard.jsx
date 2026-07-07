@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 import StockBadge from './StockBadge';
 
 const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
@@ -7,9 +8,24 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
   const isOutOfStock = stock === 0 || !isActive;
   const primaryImage = images?.[0] || '/placeholder-product.jpg';
 
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const handleAddToCart = (e) => {
     e.preventDefault();
-    if (!isOutOfStock && onAddToCart) onAddToCart(product);
+    if (isOutOfStock) return;
+    if (!user) { alert('Please log in first to add items to cart.'); navigate('/login'); return; }
+    if (user.role === 'admin' || user.role === 'seller') { alert('Sellers and Admins cannot buy products.'); return; }
+    if (onAddToCart) onAddToCart(product);
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    if (isOutOfStock) return;
+    if (!user) { alert('Please log in first to buy products.'); navigate('/login'); return; }
+    if (user.role === 'admin' || user.role === 'seller') { alert('Sellers and Admins cannot buy products.'); return; }
+    if (onAddToCart) onAddToCart(product);
+    navigate('/checkout');
   };
 
   return (
@@ -83,13 +99,23 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
           <span className="text-lg font-bold text-zinc-100">
             ৳{price.toLocaleString('en-BD')}
           </span>
-          <button onClick={handleAddToCart} disabled={isOutOfStock}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200
-                        ${isOutOfStock
-                          ? 'bg-white/5 text-zinc-600 cursor-not-allowed'
-                          : 'bg-violet-500/20 text-violet-400 border border-violet-500/30 hover:bg-violet-500/30 hover:text-violet-300 active:scale-95'}`}>
-            {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
-          </button>
+          <div className="flex gap-1.5">
+            {!isOutOfStock && (
+              <button onClick={handleAddToCart} disabled={isOutOfStock} title="Add to Cart"
+                className="flex items-center justify-center px-2.5 py-1.5 rounded-xl transition-all duration-200 bg-surface-2 hover:bg-white/5 border border-white/10 text-zinc-300 hover:text-white active:scale-95">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </button>
+            )}
+            <button onClick={isOutOfStock ? undefined : handleBuyNow} disabled={isOutOfStock}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200
+                          ${isOutOfStock
+                            ? 'bg-white/5 text-zinc-600 cursor-not-allowed'
+                            : 'bg-violet-500/20 text-violet-400 border border-violet-500/30 hover:bg-violet-500/30 hover:text-violet-300 active:scale-95'}`}>
+              {isOutOfStock ? 'Unavailable' : 'Buy Now'}
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -70,11 +70,23 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
+    if (!user) { alert('Please log in first to add items to cart.'); navigate('/login'); return; }
+    if (user.role === 'admin' || user.role === 'seller') { alert('Sellers and Admins cannot buy products.'); return; }
+
     const { replaced } = addItem(product, quantity);
     if (replaced) setReplacedSeller(true);
     setCartFeedback(true);
     setTimeout(() => setCartFeedback(false), 2500);
     setTimeout(() => setReplacedSeller(false), 4000);
+  };
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return;
+    if (!user) { alert('Please log in first to buy products.'); navigate('/login'); return; }
+    if (user.role === 'admin' || user.role === 'seller') { alert('Sellers and Admins cannot buy products.'); return; }
+
+    addItem(product, quantity);
+    navigate('/checkout');
   };
 
   if (loading) return (
@@ -224,22 +236,29 @@ const ProductDetail = () => {
                   className="px-3 py-2 text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition text-lg">+</button>
               </div>
 
-              <AnimatePresence mode="wait">
-                {cartFeedback ? (
-                  <motion.button key="added" initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-                    className="flex-1 py-3 rounded-xl bg-emerald-400/20 border border-emerald-400/30 text-emerald-400 font-semibold flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Added to Cart!
-                  </motion.button>
-                ) : (
-                  <motion.button key="add" onClick={handleAddToCart} whileTap={{ scale: 0.97 }}
-                    className="flex-1 py-3 rounded-xl btn-primary">
-                    Add to Cart — ৳{(price * quantity).toLocaleString('en-BD')}
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              <div className="flex flex-1 items-center gap-3">
+                <AnimatePresence mode="wait">
+                  {cartFeedback ? (
+                    <motion.button key="added" initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                      className="flex-1 py-3 rounded-xl bg-emerald-400/20 border border-emerald-400/30 text-emerald-400 font-semibold flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Added!
+                    </motion.button>
+                  ) : (
+                    <motion.button key="add" onClick={handleAddToCart} whileTap={{ scale: 0.97 }}
+                      className="flex-1 py-3 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/30 hover:bg-violet-500/20 transition-colors font-semibold">
+                      Add to Cart
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+
+                <motion.button onClick={handleBuyNow} whileTap={{ scale: 0.97 }}
+                  className="flex-1 py-3 rounded-xl btn-primary whitespace-nowrap">
+                  Buy Now — ৳{(price * quantity).toLocaleString('en-BD')}
+                </motion.button>
+              </div>
             </div>
           ) : (
             <button disabled
