@@ -126,7 +126,7 @@ const AdminLayout = ({ children }) => {
       <AnimatePresence>
         {drawerOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop — clicking/touching here closes the drawer */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
@@ -137,15 +137,16 @@ const AdminLayout = ({ children }) => {
               onClick={() => setDrawerOpen(false)}
             />
 
-            {/* Drawer panel */}
+            {/* Drawer panel — z-[60] so it sits above the backdrop */}
             <motion.aside
               key="drawer"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col border-r border-white/5 shadow-2xl"
+              className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-64 flex flex-col border-r border-white/5 shadow-2xl"
               style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
+              onClick={e => e.stopPropagation()}
             >
               {/* Drawer Header */}
               <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
@@ -156,13 +157,13 @@ const AdminLayout = ({ children }) => {
                     <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
                   </div>
                 </div>
-                {/* Close button */}
+                {/* Close button — larger touch target for mobile */}
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/8 transition-all"
+                  className="p-3 -mr-1 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/10 transition-all"
                   aria-label="Close navigation"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
