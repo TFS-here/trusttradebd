@@ -226,32 +226,18 @@ const App = () => (
           } />
 
           {/* ── Admin ─────────────────────────────────────────── */}
-          <Route path="/admin"           element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/login"     element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={
-            <AdminRoute><AdminLayout><AdminDashboard /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/users"  element={
-            <AdminRoute><AdminLayout><AdminUsers /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/users/:id"  element={
-            <AdminRoute><AdminLayout><AdminUserDetails /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/users/:id/products" element={
-            <AdminRoute><AdminLayout><AdminSellerProducts /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/orders" element={
-            <AdminRoute><AdminLayout><AdminOrders /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/disputes" element={
-            <AdminRoute><AdminLayout><AdminDisputes /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/simulator" element={
-            <AdminRoute><AdminLayout><AdminSimulator /></AdminLayout></AdminRoute>
-          } />
-          <Route path="/admin/settings" element={
-            <AdminRoute><AdminLayout><AdminSettings /></AdminLayout></AdminRoute>
-          } />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:id" element={<AdminUserDetails />} />
+            <Route path="users/:id/products" element={<AdminSellerProducts />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="disputes" element={<AdminDisputes />} />
+            <Route path="simulator" element={<AdminSimulator />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
 
           {/* ── 404 ───────────────────────────────────────────── */}
           <Route path="*" element={
