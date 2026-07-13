@@ -71,6 +71,8 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const closeDrawer = () => setDrawerOpen(false);
+
   // Current page label for mobile header
   const currentPage = NAV.find(n => location.pathname.startsWith(n.to))?.label || 'Admin';
 
@@ -100,6 +102,7 @@ const AdminLayout = ({ children }) => {
            style={{ background: 'linear-gradient(135deg, #0D0D10 0%, #09090B 100%)' }}>
         {/* Hamburger */}
         <button
+          type="button"
           onClick={() => setDrawerOpen(true)}
           className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 transition-all"
           aria-label="Open navigation"
@@ -118,33 +121,35 @@ const AdminLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Right spacer (keeps logo centered) */}
+        {/* Right spacer */}
         <div className="w-9" />
       </div>
 
-      {/* ── Mobile Drawer Overlay ───────────────────────────────────── */}
+      {/* ── Mobile Drawer ─────────────────────────────────────────── */}
+      {/*
+        Structure: backdrop (full-screen) wraps the drawer panel.
+        - Clicking the backdrop (outside the drawer) fires closeDrawer.
+        - The drawer panel stops propagation so taps inside don't
+          bubble up to the backdrop and accidentally close it.
+        - The close button directly calls closeDrawer.
+      */}
       <AnimatePresence>
         {drawerOpen && (
-          <>
-            {/* Backdrop — clicking/touching here closes the drawer */}
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-              onClick={() => setDrawerOpen(false)}
-            />
-
-            {/* Drawer panel — z-[60] so it sits above the backdrop */}
+          <motion.div
+            key="drawer-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={closeDrawer}
+          >
             <motion.aside
-              key="drawer"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-64 flex flex-col border-r border-white/5 shadow-2xl"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute top-0 left-0 bottom-0 w-72 flex flex-col border-r border-white/5 shadow-2xl"
               style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
               onClick={e => e.stopPropagation()}
             >
@@ -157,21 +162,24 @@ const AdminLayout = ({ children }) => {
                     <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
                   </div>
                 </div>
-                {/* Close button — larger touch target for mobile */}
+
+                {/* Close button — 48×48 minimum touch target */}
                 <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="p-3 -mr-1 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/10 transition-all"
+                  type="button"
+                  onClick={closeDrawer}
+                  style={{ touchAction: 'manipulation' }}
+                  className="flex items-center justify-center w-10 h-10 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
-              <NavItems onNavClick={() => setDrawerOpen(false)} navigate={navigate} />
+              <NavItems onNavClick={closeDrawer} navigate={navigate} />
             </motion.aside>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
