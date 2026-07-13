@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LogoIcon from '../brand/LogoIcon';
@@ -19,7 +19,7 @@ const NAV = [
 ];
 
 // Reusable nav items (used in both sidebar and drawer)
-const NavItems = ({ onNavClick, navigate }) => (
+const NavItems = ({ onNavClick, navigate, idPrefix }) => (
   <>
     <nav className="flex-1 px-3 py-4 space-y-1">
       {NAV.map(item => (
@@ -36,7 +36,7 @@ const NavItems = ({ onNavClick, navigate }) => (
           {({ isActive }) => (
             <>
               {isActive && (
-                <motion.div layoutId="admin-indicator"
+                <motion.div layoutId={`${idPrefix}-admin-indicator`}
                   className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
                   style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
               )}
@@ -73,6 +73,11 @@ const AdminLayout = ({ children }) => {
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  // Automatically close the drawer whenever the route changes
+  useEffect(() => {
+    closeDrawer();
+  }, [location.pathname]);
+
   // Current page label for mobile header
   const currentPage = NAV.find(n => location.pathname.startsWith(n.to))?.label || 'Admin';
 
@@ -94,7 +99,7 @@ const AdminLayout = ({ children }) => {
           </div>
         </div>
 
-        <NavItems onNavClick={() => {}} navigate={navigate} />
+        <NavItems onNavClick={() => {}} navigate={navigate} idPrefix="desktop" />
       </aside>
 
       {/* ── Mobile Top Header (visible only on mobile) ─────────────── */}
@@ -177,7 +182,7 @@ const AdminLayout = ({ children }) => {
                 </button>
               </div>
 
-              <NavItems onNavClick={closeDrawer} navigate={navigate} />
+              <NavItems onNavClick={closeDrawer} navigate={navigate} idPrefix="mobile" />
             </motion.aside>
           </motion.div>
         )}
