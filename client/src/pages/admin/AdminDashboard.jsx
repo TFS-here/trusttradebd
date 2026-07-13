@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   }, []);
 
   if (loading) return (
-    <div className="p-8 grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+    <div className="p-4 sm:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
       {[...Array(7)].map((_, i) => <div key={i} className="h-28 bg-surface-2 rounded-2xl" />)}
     </div>
   );
@@ -61,9 +61,9 @@ const AdminDashboard = () => {
   const { overview, escrowBreakdown, recentOrders, topSellers } = data;
 
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="section-label mb-1">Overview</p>
           <h1 className="text-2xl font-bold text-zinc-100">Dashboard</h1>
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Users"    index={0} color="violet"  value={overview.totalUsers.toLocaleString()} sub={`+${overview.newUsersThisMonth} this month`} />
         <StatCard label="Total Orders"   index={1} color="violet"  value={overview.totalOrders.toLocaleString()} sub={`${overview.ordersThisMonth} this month`} />
         <StatCard label="Platform GMV"   index={2} color="emerald" value={`৳${overview.gmv.toLocaleString('en-BD')}`} sub="All time" />

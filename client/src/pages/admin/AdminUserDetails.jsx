@@ -59,20 +59,20 @@ const AdminUserDetails = () => {
   const { user, orders, txSummary } = data;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <button onClick={() => navigate('/admin/users')} className="text-sm text-zinc-400 hover:text-white transition mb-2">
             ← Back to Users
           </button>
-          <h1 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-zinc-100 flex items-center gap-3 flex-wrap">
             User Profile
             <RoleBadge role={user.role} />
             {user.isBlocked && <span className="badge-rose text-xs px-2 py-0.5 rounded-full">Blocked</span>}
           </h1>
         </div>
         {user.role === 'seller' && (
-          <Link to={`/admin/users/${user._id}/products`} className="btn-primary text-sm px-4 py-2">
+          <Link to={`/admin/users/${user._id}/products`} className="btn-primary text-sm px-4 py-2 self-start">
             View Seller Products →
           </Link>
         )}
@@ -115,7 +115,7 @@ const AdminUserDetails = () => {
           {user.role === 'seller' && user.sellerProfile && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card rounded-2xl p-6">
               <h3 className="text-sm font-semibold text-zinc-100 mb-4 uppercase tracking-wider">Seller Dashboard</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-surface-3 p-4 rounded-xl">
                   <p className="text-xs text-zinc-500">Shop Name</p>
                   <p className="text-sm font-semibold text-zinc-200 mt-1 truncate">{user.sellerProfile.shopName || user.name}</p>

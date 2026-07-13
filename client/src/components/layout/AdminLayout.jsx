@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import LogoIcon from '../brand/LogoIcon';
 
 const NAV = [
@@ -17,14 +18,67 @@ const NAV = [
     icon: <g><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></g> },
 ];
 
+// Reusable nav items (used in both sidebar and drawer)
+const NavItems = ({ onNavClick, navigate }) => (
+  <>
+    <nav className="flex-1 px-3 py-4 space-y-1">
+      {NAV.map(item => (
+        <NavLink key={item.to} to={item.to}
+          onClick={onNavClick}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+             transition-all duration-200 group relative overflow-hidden
+             ${isActive
+               ? 'text-white bg-violet-500/20 border border-violet-500/30'
+               : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <motion.div layoutId="admin-indicator"
+                  className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
+                  style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
+              )}
+              <svg className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-violet-400' : 'text-zinc-600 group-hover:text-zinc-400'}`}
+                   fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                {item.icon}
+              </svg>
+              {item.label}
+            </>
+          )}
+        </NavLink>
+      ))}
+    </nav>
+
+    {/* Sign out */}
+    <div className="px-3 py-4 border-t border-white/5">
+      <button onClick={() => { localStorage.removeItem('tt_admin_token'); navigate('/admin/login', { replace: true }); }}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                   text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+        </svg>
+        Sign out
+      </button>
+    </div>
+  </>
+);
+
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Current page label for mobile header
+  const currentPage = NAV.find(n => location.pathname.startsWith(n.to))?.label || 'Admin';
 
   return (
     <div className="min-h-screen flex bg-surface-0">
-      {/* ── Sidebar ──────────────────────────────────────────────── */}
-      <aside className="w-56 shrink-0 flex flex-col border-r border-white/5"
+
+      {/* ── Desktop Sidebar (hidden on mobile) ────────────────────── */}
+      <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-white/5"
              style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}>
 
         {/* Logo */}
@@ -38,52 +92,90 @@ const AdminLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV.map(item => (
-            <NavLink key={item.to} to={item.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                 transition-all duration-200 group relative overflow-hidden
-                 ${isActive
-                   ? 'text-white bg-violet-500/20 border border-violet-500/30'
-                   : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div layoutId="admin-indicator"
-                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
-                      style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
-                  )}
-                  <svg className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-violet-400' : 'text-zinc-600 group-hover:text-zinc-400'}`}
-                       fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    {item.icon}
-                  </svg>
-                  {item.label}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Sign out */}
-        <div className="px-3 py-4 border-t border-white/5">
-          <button onClick={() => { localStorage.removeItem('tt_admin_token'); navigate('/admin/login', { replace: true }); }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                       text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-            Sign out
-          </button>
-        </div>
+        <NavItems onNavClick={() => {}} navigate={navigate} />
       </aside>
 
-      {/* ── Main ───────────────────────────────────────────────────── */}
-      <main className="flex-1 min-h-screen overflow-auto">
+      {/* ── Mobile Top Header (visible only on mobile) ─────────────── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 border-b border-white/5"
+           style={{ background: 'linear-gradient(135deg, #0D0D10 0%, #09090B 100%)' }}>
+        {/* Hamburger */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 transition-all"
+          aria-label="Open navigation"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+
+        {/* Logo + Page Label */}
+        <div className="flex items-center gap-2">
+          <LogoIcon size="sm" />
+          <div className="flex flex-col leading-none">
+            <p className="text-white font-extrabold text-xs leading-none">TrustTrade</p>
+            <p className="text-amber-400/70 text-[8px] mt-0.5 font-bold tracking-[0.15em] uppercase">Admin · {currentPage}</p>
+          </div>
+        </div>
+
+        {/* Right spacer (keeps logo centered) */}
+        <div className="w-9" />
+      </div>
+
+      {/* ── Mobile Drawer Overlay ───────────────────────────────────── */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => setDrawerOpen(false)}
+            />
+
+            {/* Drawer panel */}
+            <motion.aside
+              key="drawer"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              className="md:hidden fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col border-r border-white/5 shadow-2xl"
+              style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
+            >
+              {/* Drawer Header */}
+              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <LogoIcon size="sm" />
+                  <div className="flex flex-col leading-none">
+                    <p className="text-white font-extrabold text-sm leading-none">TrustTrade</p>
+                    <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
+                  </div>
+                </div>
+                {/* Close button */}
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/8 transition-all"
+                  aria-label="Close navigation"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <NavItems onNavClick={() => setDrawerOpen(false)} navigate={navigate} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Main Content ────────────────────────────────────────────── */}
+      <main className="flex-1 min-h-screen overflow-auto pt-14 md:pt-0">
         <motion.div
           key={location.pathname}
           initial={{ opacity: 0, y: 12 }}

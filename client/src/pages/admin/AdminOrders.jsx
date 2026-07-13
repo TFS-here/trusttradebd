@@ -120,7 +120,7 @@ const AdminOrders = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5 sm:space-y-6">
       <div>
         <p className="section-label mb-1">Management</p>
         <h1 className="text-2xl font-bold text-zinc-100">Orders</h1>
@@ -156,7 +156,8 @@ const AdminOrders = () => {
               const isOnHold = order.escrowStatus === 'ON_HOLD';
               return (
                 <motion.div key={order._id} layout
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-white/3 transition">
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4 hover:bg-white/3 transition">
+                  {/* Order info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <Link to={`/orders/${order._id}`} className="font-mono text-sm font-semibold text-zinc-200 hover:text-violet-400 hover:underline transition">
@@ -187,43 +188,46 @@ const AdminOrders = () => {
                       <p className="text-xs text-amber-400/70 mt-0.5 italic truncate">Note: {order.disputeNote}</p>
                     )}
                   </div>
-                  <p className="font-semibold text-sm text-zinc-100 shrink-0 hidden sm:block">
-                    ৳{order.totalAmount.toLocaleString('en-BD')}
-                  </p>
-                  <AnimatePresence>
-                    {feedback[order._id] && (
-                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="text-xs text-emerald-400 font-medium shrink-0"><Check className="inline w-5 h-5 mr-1 align-text-bottom" /> {feedback[order._id]}</motion.span>
+                  {/* Amount + actions row */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                    <p className="font-semibold text-sm text-zinc-100 shrink-0 hidden sm:block">
+                      ৳{order.totalAmount.toLocaleString('en-BD')}
+                    </p>
+                    <AnimatePresence>
+                      {feedback[order._id] && (
+                        <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          className="text-xs text-emerald-400 font-medium shrink-0"><Check className="inline w-5 h-5 mr-1 align-text-bottom" /> {feedback[order._id]}</motion.span>
+                      )}
+                    </AnimatePresence>
+                    {isActionable && (
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        {order.escrowStatus === 'SHIPPED' && (
+                          <button onClick={() => setModal({ action: 'simulate_delivery', order })}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 hover:bg-violet-500/20 transition font-medium">
+                            Simulate
+                          </button>
+                        )}
+                        {!isOnHold && (
+                          <button onClick={() => setModal({ action: 'hold', order })}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-400 hover:bg-amber-400/20 transition font-medium">
+                            Hold
+                          </button>
+                        )}
+                        {isOnHold && (
+                          <>
+                            <button onClick={() => setModal({ action: 'release', order })}
+                              className="text-xs px-3 py-1.5 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 hover:bg-emerald-400/20 transition font-medium">
+                              Release
+                            </button>
+                            <button onClick={() => setModal({ action: 'refund', order })}
+                              className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition font-medium">
+                              Refund
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
-                  </AnimatePresence>
-                  {isActionable && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      {order.escrowStatus === 'SHIPPED' && (
-                        <button onClick={() => setModal({ action: 'simulate_delivery', order })}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 hover:bg-violet-500/20 transition font-medium">
-                          Simulate Delivery
-                        </button>
-                      )}
-                      {!isOnHold && (
-                        <button onClick={() => setModal({ action: 'hold', order })}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-400 hover:bg-amber-400/20 transition font-medium">
-                          Hold
-                        </button>
-                      )}
-                      {isOnHold && (
-                        <>
-                          <button onClick={() => setModal({ action: 'release', order })}
-                            className="text-xs px-3 py-1.5 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 hover:bg-emerald-400/20 transition font-medium">
-                            Release
-                          </button>
-                          <button onClick={() => setModal({ action: 'refund', order })}
-                            className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition font-medium">
-                            Refund
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </motion.div>
               );
             })}

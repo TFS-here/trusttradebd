@@ -58,7 +58,7 @@ const AdminSellerProducts = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5 sm:space-y-6">
       <div className="flex items-center gap-4 mb-4">
         <Link to="/admin/users" className="text-zinc-400 hover:text-white transition">
           ← Back to Users
@@ -82,7 +82,7 @@ const AdminSellerProducts = () => {
           <div className="divide-y divide-white/5">
             {products.map(product => (
               <motion.div key={product._id} layout
-                className={`flex items-center gap-4 px-5 py-4 transition ${product.isBanned ? 'opacity-60 bg-rose-500/5' : 'hover:bg-white/3'}`}>
+                className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4 transition ${product.isBanned ? 'opacity-60 bg-rose-500/5' : 'hover:bg-white/3'}`}>
                 <img src={product.images?.[0] || '/placeholder-product.jpg'}
                   alt="" className="w-16 h-16 rounded-xl object-cover ring-1 ring-white/10 shrink-0" />
                 <div className="flex-1 min-w-0">

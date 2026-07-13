@@ -48,7 +48,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <p className="section-label mb-1">Admin Tools</p>
@@ -98,7 +98,7 @@ const AdminSettings = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+            <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <AnimatePresence mode="wait">
                 {feedback ? (
                   <motion.p

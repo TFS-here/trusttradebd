@@ -68,7 +68,7 @@ const AdminDisputes = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
       {/* Header */}
       <div>
         <p className="section-label mb-1">Admin</p>
@@ -97,7 +97,7 @@ const AdminDisputes = () => {
         )}
       </AnimatePresence>
 
-      {/* Disputes Table */}
+      {/* Disputes — card list on mobile, table on md+ */}
       <div className="card rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
           <p className="font-semibold text-zinc-200">All Disputes ({disputes.length})</p>
@@ -109,55 +109,94 @@ const AdminDisputes = () => {
             <p className="text-sm mt-1">All transactions are clean.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-zinc-600 text-xs uppercase tracking-wider">
-                  <th className="px-5 py-3">Dispute ID</th>
-                  <th className="px-5 py-3">Order</th>
-                  <th className="px-5 py-3">Buyer</th>
-                  <th className="px-5 py-3">Seller</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Reason</th>
-                  <th className="px-5 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {disputes.map((d) => (
-                  <tr key={d._id} className="hover:bg-white/[0.02] transition">
-                    <td className="px-5 py-3 font-mono text-xs text-zinc-400">
-                      #{d._id.slice(-6).toUpperCase()}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-xs text-violet-400">
-                      #{d.order?._id?.slice(-6).toUpperCase() || '—'}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-300">
-                      {d.buyer?.name || '—'}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-300">
-                      {d.seller?.name || '—'}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-lg border ${statusStyles[d.status] || statusStyles.Closed}`}>
-                        {d.status.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-zinc-500 max-w-[200px] truncate">
-                      {d.reason}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button
-                        onClick={() => setSelected(d)}
-                        className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition"
-                      >
-                        View Details
-                      </button>
-                    </td>
+          <>
+            {/* ── Mobile card list (< md) ───────────────────────────── */}
+            <div className="md:hidden divide-y divide-white/5">
+              {disputes.map((d) => (
+                <div key={d._id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="font-mono text-xs text-zinc-400">Dispute #{d._id.slice(-6).toUpperCase()}</p>
+                      <p className="font-mono text-xs text-violet-400">Order #{d.order?._id?.slice(-6).toUpperCase() || '—'}</p>
+                    </div>
+                    <span className={`shrink-0 inline-block px-2.5 py-1 text-xs font-semibold rounded-lg border ${statusStyles[d.status] || statusStyles.Closed}`}>
+                      {d.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="bg-surface-2/50 rounded-xl px-3 py-2">
+                      <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-0.5">Buyer</p>
+                      <p className="text-zinc-300 text-xs font-medium truncate">{d.buyer?.name || '—'}</p>
+                    </div>
+                    <div className="bg-surface-2/50 rounded-xl px-3 py-2">
+                      <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-0.5">Seller</p>
+                      <p className="text-zinc-300 text-xs font-medium truncate">{d.seller?.name || '—'}</p>
+                    </div>
+                  </div>
+                  {d.reason && (
+                    <p className="text-xs text-zinc-500 line-clamp-2">{d.reason}</p>
+                  )}
+                  <button
+                    onClick={() => setSelected(d)}
+                    className="w-full text-center text-xs font-semibold text-violet-400 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition rounded-xl py-2"
+                  >
+                    View Details
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Desktop table (md+) ──────────────────────────────── */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-zinc-600 text-xs uppercase tracking-wider">
+                    <th className="px-5 py-3">Dispute ID</th>
+                    <th className="px-5 py-3">Order</th>
+                    <th className="px-5 py-3">Buyer</th>
+                    <th className="px-5 py-3">Seller</th>
+                    <th className="px-5 py-3">Status</th>
+                    <th className="px-5 py-3">Reason</th>
+                    <th className="px-5 py-3">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {disputes.map((d) => (
+                    <tr key={d._id} className="hover:bg-white/[0.02] transition">
+                      <td className="px-5 py-3 font-mono text-xs text-zinc-400">
+                        #{d._id.slice(-6).toUpperCase()}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-xs text-violet-400">
+                        #{d.order?._id?.slice(-6).toUpperCase() || '—'}
+                      </td>
+                      <td className="px-5 py-3 text-zinc-300">
+                        {d.buyer?.name || '—'}
+                      </td>
+                      <td className="px-5 py-3 text-zinc-300">
+                        {d.seller?.name || '—'}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-lg border ${statusStyles[d.status] || statusStyles.Closed}`}>
+                          {d.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-zinc-500 max-w-[200px] truncate">
+                        {d.reason}
+                      </td>
+                      <td className="px-5 py-3">
+                        <button
+                          onClick={() => setSelected(d)}
+                          className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
