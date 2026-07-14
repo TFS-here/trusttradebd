@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -79,6 +79,10 @@ const NavItem = ({ to, children, end }) => (
 // ── User dropdown ────────────────────────────────────────────────
 const UserMenu = ({ user, onLogout }) => {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+
   const roleLabelMap = { buyer: 'Buyer', seller: 'Seller', admin: 'Admin' };
 
   const menuItems = {
@@ -113,59 +117,63 @@ const UserMenu = ({ user, onLogout }) => {
         </svg>
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="absolute right-0 top-full mt-2 w-56 z-40 card-glass rounded-2xl
-                         shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
-            >
-              {/* User info */}
-              <div className="px-4 py-3 border-b border-white/8">
-                <p className="text-sm font-semibold text-zinc-100 truncate">{user.name}</p>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{user.email}</p>
-                {user.wallet && (
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span className="text-xs text-emerald-400 font-semibold">
-                      ৳{available.toLocaleString('en-BD')} available
-                    </span>
-                  </div>
-                )}
-              </div>
+      <motion.div
+        initial={false}
+        animate={open ? "open" : "closed"}
+        variants={{ open: { opacity: 1, display: 'block' }, closed: { opacity: 0, display: 'none' } }}
+        className="fixed inset-0 z-30" 
+        onClick={() => setOpen(false)} 
+      />
+      
+      <motion.div
+        initial={false}
+        animate={open ? "open" : "closed"}
+        variants={{
+          open: { opacity: 1, y: 0, scale: 1, pointerEvents: 'auto' },
+          closed: { opacity: 0, y: 8, scale: 0.95, pointerEvents: 'none' }
+        }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        className="absolute right-0 top-full mt-2 w-56 z-40 card-glass rounded-2xl
+                   shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
+      >
+        {/* User info */}
+        <div className="px-4 py-3 border-b border-white/8">
+          <p className="text-sm font-semibold text-zinc-100 truncate">{user.name}</p>
+          <p className="text-xs text-zinc-500 truncate mt-0.5">{user.email}</p>
+          {user.wallet && (
+            <div className="mt-2 flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-xs text-emerald-400 font-semibold">
+                ৳{available.toLocaleString('en-BD')} available
+              </span>
+            </div>
+          )}
+        </div>
 
-              {/* Menu items */}
-              <div className="py-1">
-                {items.map(item => (
-                  <Link key={item.to} to={item.to} onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300
-                               hover:text-white hover:bg-violet-500/10 transition-colors">
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
+        {/* Menu items */}
+        <div className="py-1">
+          {items.map(item => (
+            <Link key={item.to} to={item.to} onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300
+                         hover:text-white hover:bg-violet-500/10 transition-colors">
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
-              {/* Sign out */}
-              <div className="border-t border-white/8 py-1">
-                <button onClick={() => { setOpen(false); onLogout(); }}
-                  className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm
-                             text-rose-400 hover:bg-rose-500/10 transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                  </svg>
-                  Sign out
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Sign out */}
+        <div className="border-t border-white/8 py-1">
+          <button onClick={() => { setOpen(false); onLogout(); }}
+            className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm
+                       text-rose-400 hover:bg-rose-500/10 transition-colors">
+            <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+            Sign out
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 };
@@ -175,8 +183,14 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+
+  // Close menus on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => { await logout(); navigate('/login'); };
 
@@ -270,39 +284,38 @@ const Navbar = () => {
           </div>
         </nav>
 
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden border-t border-white/5 overflow-hidden relative bg-surface-0/95 backdrop-blur-xl"
-            >
-              <div className="px-4 py-3 space-y-1">
-                {user ? (
-                  navLinks.map(l => (
-                    <NavLink key={l.to} to={l.to} end={l.end}
-                      onClick={() => setMobileOpen(false)}
-                      className={({ isActive }) =>
-                        `block px-3 py-2.5 rounded-xl text-sm font-medium transition
-                         ${isActive ? 'bg-violet-500/15 text-violet-400' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`
-                      }
-                    >
-                      {l.label}
-                    </NavLink>
-                  ))
-                ) : (
-                  localStorage.getItem('tt_admin_token') && (
-                    <Link to="/admin/dashboard" onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-xl text-sm font-medium transition text-violet-400 hover:bg-violet-500/15">
-                      Return to Admin
-                    </Link>
-                  )
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <motion.div
+          initial={false}
+          animate={mobileOpen ? "open" : "closed"}
+          variants={{
+            open: { height: 'auto', opacity: 1, pointerEvents: 'auto' },
+            closed: { height: 0, opacity: 0, pointerEvents: 'none' }
+          }}
+          className="md:hidden border-t border-white/5 overflow-hidden relative bg-surface-0/95 backdrop-blur-xl"
+        >
+          <div className="px-4 py-3 space-y-1">
+            {user ? (
+              navLinks.map(l => (
+                <NavLink key={l.to} to={l.to} end={l.end}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `block px-3 py-2.5 rounded-xl text-sm font-medium transition
+                     ${isActive ? 'bg-violet-500/15 text-violet-400' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`
+                  }
+                >
+                  {l.label}
+                </NavLink>
+              ))
+            ) : (
+              localStorage.getItem('tt_admin_token') && (
+                <Link to="/admin/dashboard" onClick={() => setMobileOpen(false)}
+                  className="block px-3 py-2.5 rounded-xl text-sm font-medium transition text-violet-400 hover:bg-violet-500/15">
+                  Return to Admin
+                </Link>
+              )
+            )}
+          </div>
+        </motion.div>
       </header>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
