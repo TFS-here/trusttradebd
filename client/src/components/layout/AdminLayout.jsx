@@ -36,9 +36,15 @@ const NavItems = ({ onNavClick, navigate, idPrefix }) => (
           {({ isActive }) => (
             <>
               {isActive && (
-                <motion.div layoutId={`${idPrefix}-admin-indicator`}
-                  className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
-                  style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
+                idPrefix === 'desktop' ? (
+                  <motion.div layoutId="admin-indicator"
+                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
+                    style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
+                ) : (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r"
+                    style={{ boxShadow: '0 0 8px rgba(139,92,246,0.8)' }} />
+                )
               )}
               <svg className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-violet-400' : 'text-zinc-600 group-hover:text-zinc-400'}`}
                    fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -176,7 +182,7 @@ const AdminLayout = ({ children }) => {
                   className="flex items-center justify-center w-10 h-10 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+                  <svg className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
