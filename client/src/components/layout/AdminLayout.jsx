@@ -144,55 +144,54 @@ const AdminLayout = ({ children }) => {
           bubble up to the backdrop and accidentally close it.
         - The close button directly calls closeDrawer.
       */}
-      <AnimatePresence>
-        {drawerOpen && (
-          <motion.div
-            key="drawer-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-            onClick={closeDrawer}
-          >
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute top-0 left-0 bottom-0 w-72 flex flex-col border-r border-white/5 shadow-2xl"
-              style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Drawer Header */}
-              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <LogoIcon size="sm" />
-                  <div className="flex flex-col leading-none">
-                    <p className="text-white font-extrabold text-sm leading-none">TrustTrade</p>
-                    <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
-                  </div>
-                </div>
-
-                {/* Close button — 48×48 minimum touch target */}
-                <button
-                  type="button"
-                  onClick={closeDrawer}
-                  style={{ touchAction: 'manipulation' }}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
-                  aria-label="Close navigation"
-                >
-                  <svg className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+      <motion.div
+        initial={false}
+        animate={drawerOpen ? 'open' : 'closed'}
+        variants={{
+          open: { opacity: 1, pointerEvents: 'auto' },
+          closed: { opacity: 0, pointerEvents: 'none' }
+        }}
+        transition={{ duration: 0.15 }}
+        className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        onClick={closeDrawer}
+      >
+        <motion.aside
+          variants={{
+            open: { x: 0 },
+            closed: { x: '-100%' }
+          }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="absolute top-0 left-0 bottom-0 w-72 flex flex-col border-r border-white/5 shadow-2xl"
+          style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Drawer Header */}
+          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <LogoIcon size="sm" />
+              <div className="flex flex-col leading-none">
+                <p className="text-white font-extrabold text-sm leading-none">TrustTrade</p>
+                <p className="text-amber-400/70 text-[9px] mt-1 font-bold tracking-[0.2em] uppercase">Admin Panel</p>
               </div>
+            </div>
 
-              <NavItems onNavClick={closeDrawer} navigate={navigate} idPrefix="mobile" />
-            </motion.aside>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {/* Close button — 48×48 minimum touch target */}
+            <button
+              type="button"
+              onClick={closeDrawer}
+              style={{ touchAction: 'manipulation' }}
+              className="flex items-center justify-center w-10 h-10 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
+              aria-label="Close navigation"
+            >
+              <svg className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <NavItems onNavClick={closeDrawer} navigate={navigate} idPrefix="mobile" />
+        </motion.aside>
+      </motion.div>
 
       {/* ── Main Content ────────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen overflow-auto pt-14 md:pt-0">
