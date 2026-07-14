@@ -21,10 +21,9 @@ const NAV = [
 // Reusable nav items (used in both sidebar and drawer)
 const NavItems = ({ onNavClick, navigate, idPrefix }) => (
   <>
-    <nav className="flex-1 px-3 py-4 space-y-1">
+    <nav className="flex-1 px-3 py-4 space-y-1" onClick={onNavClick}>
       {NAV.map(item => (
         <NavLink key={item.to} to={item.to}
-          onClick={onNavClick}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
              transition-all duration-200 group relative overflow-hidden
@@ -59,7 +58,7 @@ const NavItems = ({ onNavClick, navigate, idPrefix }) => (
 
     {/* Sign out */}
     <div className="px-3 py-4 border-t border-white/5">
-      <button onClick={() => { localStorage.removeItem('tt_admin_token'); navigate('/admin/login', { replace: true }); }}
+      <button onClick={() => { localStorage.removeItem('tt_admin_token'); onNavClick(); navigate('/admin/login', { replace: true }); }}
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                    text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
