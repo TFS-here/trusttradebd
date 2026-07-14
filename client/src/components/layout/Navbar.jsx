@@ -194,9 +194,12 @@ const Navbar = () => {
 
   const handleLogout = async () => { await logout(); navigate('/login'); };
 
-  const navLinks = user?.role === 'seller'
-    ? [{ label: 'Dashboard', to: '/seller/dashboard' }, { label: 'Browse', to: '/', end: true }, { label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }]
-    : [{ label: 'Browse', to: '/', end: true }, { label: 'My Orders', to: '/orders' }];
+  const navLinks =
+    user?.role === 'seller'
+      ? [{ label: 'Dashboard', to: '/seller/dashboard' }, { label: 'Browse', to: '/', end: true }, { label: 'Products', to: '/seller/products' }, { label: 'Orders', to: '/seller/orders' }]
+      : user?.role === 'admin'
+      ? [{ label: 'Dashboard', to: '/admin/dashboard' }]
+      : [{ label: 'Browse', to: '/', end: true }, { label: 'My Orders', to: '/orders' }];
 
   return (
     <>
@@ -293,11 +296,13 @@ const Navbar = () => {
           }}
           className="md:hidden border-t border-white/5 overflow-hidden relative bg-surface-0/95 backdrop-blur-xl"
         >
-          <div className="px-4 py-3 space-y-1">
+          <div 
+            className="px-4 py-3 space-y-1"
+            onClick={() => setMobileOpen(false)}
+          >
             {user ? (
               navLinks.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end}
-                  onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     `block px-3 py-2.5 rounded-xl text-sm font-medium transition
                      ${isActive ? 'bg-violet-500/15 text-violet-400' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`
