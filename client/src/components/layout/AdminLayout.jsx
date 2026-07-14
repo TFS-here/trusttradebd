@@ -80,7 +80,7 @@ const AdminLayout = ({ children }) => {
 
   // Automatically close the drawer whenever the route changes
   useEffect(() => {
-    closeDrawer();
+    setDrawerOpen(false);
   }, [location.pathname]);
 
   // Current page label for mobile header
@@ -136,32 +136,24 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* ── Mobile Drawer ─────────────────────────────────────────── */}
-      {/*
-        Structure: backdrop (full-screen) wraps the drawer panel.
-        - Clicking the backdrop (outside the drawer) fires closeDrawer.
-        - The drawer panel stops propagation so taps inside don't
-          bubble up to the backdrop and accidentally close it.
-        - The close button directly calls closeDrawer.
-      */}
-      <motion.div
-        initial={false}
-        animate={drawerOpen ? 'open' : 'closed'}
-        variants={{
-          open: { opacity: 1, pointerEvents: 'auto' },
-          closed: { opacity: 0, pointerEvents: 'none' }
-        }}
-        transition={{ duration: 0.15 }}
+      {/* Backdrop */}
+      <div
         className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        style={{
+          opacity: drawerOpen ? 1 : 0,
+          pointerEvents: drawerOpen ? 'auto' : 'none',
+          transition: 'opacity 0.2s ease',
+        }}
         onClick={closeDrawer}
       >
-        <motion.aside
-          variants={{
-            open: { x: 0 },
-            closed: { x: '-100%' }
-          }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        {/* Drawer Panel */}
+        <div
           className="absolute top-0 left-0 bottom-0 w-72 flex flex-col border-r border-white/5 shadow-2xl"
-          style={{ background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)' }}
+          style={{
+            background: 'linear-gradient(180deg, #0D0D10 0%, #09090B 100%)',
+            transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
+            transition: 'transform 0.25s cubic-bezier(0.4,0,0.2,1)',
+          }}
           onClick={e => e.stopPropagation()}
         >
           {/* Drawer Header */}
@@ -174,10 +166,10 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
 
-            {/* Close button — 48×48 minimum touch target */}
+            {/* Close button */}
             <button
               type="button"
-              onClick={closeDrawer}
+              onClick={(e) => { e.stopPropagation(); setDrawerOpen(false); }}
               style={{ touchAction: 'manipulation' }}
               className="flex items-center justify-center w-10 h-10 rounded-xl text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
               aria-label="Close navigation"
@@ -189,8 +181,8 @@ const AdminLayout = ({ children }) => {
           </div>
 
           <NavItems onNavClick={closeDrawer} navigate={navigate} idPrefix="mobile" />
-        </motion.aside>
-      </motion.div>
+        </div>
+      </div>
 
       {/* ── Main Content ────────────────────────────────────────────── */}
       <main className="flex-1 min-h-screen overflow-auto pt-14 md:pt-0">
