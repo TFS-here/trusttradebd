@@ -1,5 +1,4 @@
-require('dotenv').config();
-
+const env = require('./config/env');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -40,9 +39,18 @@ startEscrowCronJob();
 app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────
+const rawOrigins = (env.CLIENT_URL || '*').split(',').map((url) => url.trim());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      // Allow wildcard or matching origins
+      if (rawOrigins.includes('*') || rawOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'idempotency-key', 'x-idempotency-key'],
@@ -51,8 +59,8 @@ app.use(
 
 // ── Rate limiting ─────────────────────────────────────────────────
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -80,23 +88,33 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 // ── Sanitize against NoSQL injection ─────────────────────────────
 app.use(mongoSanitize());
 
-// ── HTTP request logger ───────────────────────────────────────────
-if (process.env.NODE_ENV === 'development') {
+// ── Request logging (development only) ────────────────────────────
+if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
 }
+
+// ── Root endpoint (welcome & status ping) ────────────────────────
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: '🚀 TrustTrade BD API Server is running!',
+    health: '/api/health',
+    timestamp: new Date().toISOString(),
+    env: env.NODE_ENV,
+  });
+});
 
 // ── Health check ──────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.status(200).json({
-    status: 'ok',
-    environment: process.env.NODE_ENV,
+    status: 'success',
+    message: 'TrustTrade BD API is healthy.',
     timestamp: new Date().toISOString(),
+    env: env.NODE_ENV,
   });
 });
 
-// ── Routes ────────────────────────────────────────────────────────
+// ── Mount Routes ──────────────────────────────────────────────────
 app.use('/api/auth',     authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders',   orderRoutes);
@@ -130,15 +148,16 @@ process.on('uncaughtException', (err) => {
 });
 
 // ── Start server ──────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
-// Only listen when not in Vercel production environment
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 TrustTrade BD server running on port ${PORT} [${process.env.NODE_ENV}]`);
+// Listen on all network interfaces in standalone / container / Render environments
+// (Vercel serverless exports the app and injects process.env.VERCEL)
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 TrustTrade BD server running on port ${PORT} [${env.NODE_ENV}]`);
   });
 }
 
-// Export the app for Vercel Serverless
+// Export the app for Vercel Serverless (if still used)
 module.exports = app;
 

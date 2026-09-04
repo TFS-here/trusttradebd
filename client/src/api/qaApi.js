@@ -1,29 +1,18 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tt_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import apiClient from './apiClient';
 
 export const qaApi = {
   getForProduct: (productId, params = {}) =>
-    api.get(`/qa/product/${productId}`, { params }),
+    apiClient.get(`/qa/product/${productId}`, { params }),
 
   ask: (productId, question) =>
-    api.post(`/qa/product/${productId}`, { question }),
+    apiClient.post(`/qa/product/${productId}`, { question }),
 
   answer: (questionId, answer) =>
-    api.put(`/qa/${questionId}/answer`, { answer }),
+    apiClient.put(`/qa/${questionId}/answer`, { answer }),
 
   delete: (questionId) =>
-    api.delete(`/qa/${questionId}`),
+    apiClient.delete(`/qa/${questionId}`),
 
   getPendingForSeller: () =>
-    api.get('/qa/seller/pending'),
+    apiClient.get('/qa/seller/pending'),
 };

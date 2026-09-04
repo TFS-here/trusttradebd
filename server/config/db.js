@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const env = require('./env');
 
 const connectDB = async () => {
   const MAX_RETRIES = 5;
@@ -8,7 +9,7 @@ const connectDB = async () => {
   const connect = async () => {
     try {
       attempts += 1;
-      const conn = await mongoose.connect(process.env.MONGO_URI, {
+      const conn = await mongoose.connect(env.MONGO_URI, {
         // Mongoose 8+ handles these internally, but explicit for clarity
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,

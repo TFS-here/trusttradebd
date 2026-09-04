@@ -1,16 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true,
-});
-
-// Attach JWT from localStorage on every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tt_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import apiClient from './apiClient';
 
 // ── Product API calls ─────────────────────────────────────────────
 
@@ -20,49 +8,49 @@ export const productApi = {
    * @param {Object} params  { page, limit, category, search, sort, inStock, minPrice, maxPrice }
    */
   getAll: (params = {}) =>
-    api.get('/products', { params }),
+    apiClient.get('/products', { params }),
 
   /**
    * GET /products/:id — single product + related
    */
   getById: (id) =>
-    api.get(`/products/${id}`),
+    apiClient.get(`/products/${id}`),
 
   /**
    * GET /products/seller/my-products — seller's own listings
    */
   getMyProducts: (params = {}) =>
-    api.get('/products/seller/my-products', { params }),
+    apiClient.get('/products/seller/my-products', { params }),
 
   /**
    * POST /products — create a new listing (seller only)
    */
   create: (data) =>
-    api.post('/products', data),
+    apiClient.post('/products', data),
 
   /**
    * PUT /products/:id — update title, price, stock, etc.
    */
   update: (id, data) =>
-    api.put(`/products/${id}`, data),
+    apiClient.put(`/products/${id}`, data),
 
   /**
    * PATCH /products/:id/restock — add quantity to existing stock
    */
   restock: (id, quantity) =>
-    api.patch(`/products/${id}/restock`, { quantity }),
+    apiClient.patch(`/products/${id}/restock`, { quantity }),
 
   /**
    * DELETE /products/:id — soft or hard delete
    */
   remove: (id) =>
-    api.delete(`/products/${id}`),
+    apiClient.delete(`/products/${id}`),
 
   /**
    * POST /upload — upload an image to Cloudinary
    */
   uploadImage: (formData) =>
-    api.post('/upload', formData, {
+    apiClient.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 };

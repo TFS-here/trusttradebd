@@ -1,33 +1,22 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tt_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import apiClient from './apiClient';
 
 // ── Orders ────────────────────────────────────────────────────────
 export const orderApi = {
-  place: (data)        => api.post('/orders', data),
-  createForPayment: (data) => api.post('/orders/create-for-payment', data), // SSLCommerz flow
-  getAll: (params)     => api.get('/orders', { params }),
-  getSellerAnalytics: ()=> api.get('/orders/seller/analytics'),
-  getById: (id)        => api.get(`/orders/${id}`),
-  ship: (id, data)     => api.patch(`/orders/${id}/ship`, data),
-  confirmDelivery: (id)=> api.patch(`/orders/${id}/confirm-delivery`),
-  cancel: (id)         => api.patch(`/orders/${id}/cancel`),
+  place: (data)        => apiClient.post('/orders', data),
+  createForPayment: (data) => apiClient.post('/orders/create-for-payment', data), // SSLCommerz flow
+  getAll: (params)     => apiClient.get('/orders', { params }),
+  getSellerAnalytics: ()=> apiClient.get('/orders/seller/analytics'),
+  getById: (id)        => apiClient.get(`/orders/${id}`),
+  ship: (id, data)     => apiClient.patch(`/orders/${id}/ship`, data),
+  confirmDelivery: (id)=> apiClient.patch(`/orders/${id}/confirm-delivery`),
+  cancel: (id)         => apiClient.patch(`/orders/${id}/cancel`),
 };
 
 // ── Payment (SSLCommerz) ──────────────────────────────────────────
 export const paymentApi = {
   /** Initiate SSLCommerz session — returns { GatewayPageURL } */
   initiate: (orderId, idempotencyKey) =>
-    api.post(
+    apiClient.post(
       '/payment/initiate',
       { orderId },
       idempotencyKey ? { headers: { 'idempotency-key': idempotencyKey } } : {}
@@ -36,9 +25,8 @@ export const paymentApi = {
 
 // ── Wallet ────────────────────────────────────────────────────────
 export const walletApi = {
-  getBalance: ()            => api.get('/wallet/balance'),
-  deposit: (amount)         => api.post('/wallet/deposit', { amount }),
-  getTransactions: (params) => api.get('/wallet/transactions', { params }),
-  withdraw: (amount)         => api.post('/wallet/withdraw', { amount }),
+  getBalance: ()            => apiClient.get('/wallet/balance'),
+  deposit: (amount)         => apiClient.post('/wallet/deposit', { amount }),
+  getTransactions: (params) => apiClient.get('/wallet/transactions', { params }),
+  withdraw: (amount)         => apiClient.post('/wallet/withdraw', { amount }),
 };
-

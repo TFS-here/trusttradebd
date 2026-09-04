@@ -47,7 +47,9 @@ const getBalance = async (req, res, next) => {
  */
 const deposit = async (req, res, next) => {
   try {
-    const { amount } = req.body;
+    const { amount, callbackBaseUrl } = req.body;
+    // Mobile clients send their own network IP so SSLCommerz redirects to a reachable URL
+    const effectiveApiUrl = callbackBaseUrl || API_URL;
 
     const parsed = parseFloat(amount);
     if (!amount || isNaN(parsed) || parsed <= 0) {
@@ -65,10 +67,10 @@ const deposit = async (req, res, next) => {
       total_amount: rounded,
       currency: 'BDT',
       tran_id: tran_id,
-      success_url: `${API_URL}/api/wallet/deposit/success`,
-      fail_url: `${API_URL}/api/wallet/deposit/fail`,
-      cancel_url: `${API_URL}/api/wallet/deposit/cancel`,
-      ipn_url: `${API_URL}/api/wallet/deposit/ipn`, // IPN not strictly necessary with success_url validation, but good practice
+      success_url: `${effectiveApiUrl}/api/wallet/deposit/success`,
+      fail_url: `${effectiveApiUrl}/api/wallet/deposit/fail`,
+      cancel_url: `${effectiveApiUrl}/api/wallet/deposit/cancel`,
+      ipn_url: `${effectiveApiUrl}/api/wallet/deposit/ipn`,
       shipping_method: 'No',
       product_name: 'Wallet Deposit',
       product_category: 'Finance',

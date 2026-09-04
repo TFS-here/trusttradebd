@@ -1,19 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient, { apiClient as api } from '../api/apiClient';
 
-// ── Axios instance ────────────────────────────────────────────────
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tt_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-// Export for use in other api modules
+// Re-export api for backward compatibility
 export { api };
 
 // ── Context ───────────────────────────────────────────────────────
