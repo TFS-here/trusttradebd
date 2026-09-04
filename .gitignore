@@ -1,8 +1,28 @@
+# Dependencies
 node_modules/
+
+# Environment Variables
 .env
-.env.local
-.expo/
+.env.*
+!.env.example
+
+# Build & Deployment artifacts
 dist/
 build/
+.expo/
+.vercel/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS & Editor files
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Testing & Coverage
+coverage/
