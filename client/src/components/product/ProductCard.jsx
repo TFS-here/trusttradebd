@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import StockBadge from './StockBadge';
 
-const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
+const ProductCard = ({ product, onAddToCart, showSeller = true, isLcpPriority = false }) => {
   const { _id, title, price, images, rating, reviewCount, stock, isActive, seller, category } = product;
   const isOutOfStock = stock === 0 || !isActive;
   const primaryImage = images?.[0] || '/placeholder-product.jpg';
@@ -47,10 +47,18 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
 
       {/* Image */}
       <Link to={`/products/${_id}`} className="relative block overflow-hidden aspect-square bg-surface-2">
-        <img src={primaryImage} alt={title}
+        <img
+          src={primaryImage}
+          alt={title}
+          width="400"
+          height="400"
+          loading={isLcpPriority ? "eager" : "lazy"}
+          fetchpriority={isLcpPriority ? "high" : "auto"}
+          decoding="async"
           className={`w-full h-full object-cover transition-transform duration-500
                       ${!isOutOfStock ? 'group-hover:scale-105' : ''}`}
-          onError={e => { e.target.src = '/placeholder-product.jpg'; }} />
+          onError={e => { e.target.src = '/placeholder-product.jpg'; }}
+        />
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-surface-1/60 via-transparent to-transparent" />
@@ -69,7 +77,7 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
       {/* Body */}
       <div className="flex flex-col flex-1 p-4 gap-2">
         {showSeller && seller && (
-          <p className="text-xs text-zinc-600 truncate">
+          <p className="text-xs text-zinc-400 truncate">
             {seller.sellerProfile?.shopName || seller.name}
           </p>
         )}
@@ -91,7 +99,7 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
                 </svg>
               ))}
             </div>
-            <span className="text-xs text-zinc-600">({reviewCount})</span>
+            <span className="text-xs text-zinc-400">({reviewCount})</span>
           </div>
         )}
 
@@ -101,7 +109,7 @@ const ProductCard = ({ product, onAddToCart, showSeller = true }) => {
           </span>
           <div className="flex gap-1.5">
             {!isOutOfStock && (
-              <button onClick={handleAddToCart} disabled={isOutOfStock} title="Add to Cart"
+              <button onClick={handleAddToCart} disabled={isOutOfStock} title="Add to Cart" aria-label={`Add ${title} to Cart`}
                 className="flex items-center justify-center px-2.5 py-1.5 rounded-xl transition-all duration-200 bg-surface-2 hover:bg-white/5 border border-white/10 text-zinc-300 hover:text-white active:scale-95">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

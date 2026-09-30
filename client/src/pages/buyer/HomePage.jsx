@@ -81,7 +81,7 @@ const HomePage = () => {
               Buy & Sell with{' '}
               <span className="text-gradient">Confidence</span>
             </h1>
-            <p className="text-zinc-500 mb-6 text-sm max-w-md mx-auto">
+            <p className="text-zinc-400 mb-6 text-sm max-w-md mx-auto">
               Every transaction protected by escrow — pay only when you receive
             </p>
           </motion.div>
@@ -111,7 +111,7 @@ const HomePage = () => {
             className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
                         ${category === value
                           ? 'bg-violet-500/20 text-violet-400 border border-violet-500/40 shadow-glow-violet/20'
-                          : 'bg-surface-2 text-zinc-500 border border-white/5 hover:border-violet-500/20 hover:text-zinc-300'}`}>
+                          : 'bg-surface-2 text-zinc-300 border border-white/5 hover:border-violet-500/20 hover:text-white'}`}>
             {label}
           </button>
         ))}
@@ -121,11 +121,11 @@ const HomePage = () => {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           {pagination && (
-            <p className="text-sm text-zinc-600">
-              <span className="text-zinc-400 font-medium">{pagination.total.toLocaleString()}</span> products
+            <p className="text-sm text-zinc-400">
+              <span className="text-zinc-200 font-medium">{pagination.total.toLocaleString()}</span> products
             </p>
           )}
-          <label className="flex items-center gap-2 text-sm text-zinc-500 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer select-none">
             <input type="checkbox" checked={inStockOnly}
               onChange={e => { setInStock(e.target.checked); setParams(p => ({ ...p, inStock: e.target.checked ? 'true' : '', page: 1 })); }}
               className="rounded accent-violet-500" />
@@ -133,11 +133,15 @@ const HomePage = () => {
           </label>
         </div>
         <select value={sort} onChange={e => handleSort(e.target.value)}
-          className="bg-surface-2 border border-white/8 text-zinc-400 text-sm rounded-xl px-3 py-2
+          aria-label="Sort products by"
+          className="bg-surface-2 border border-white/8 text-zinc-300 text-sm rounded-xl px-3 py-2
                      focus:outline-none focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20">
           {SORT_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
         </select>
       </div>
+
+      {/* ── Heading for accessibility outline (h1 -> h2 -> h3) ─── */}
+      <h2 className="sr-only">Available Marketplace Products</h2>
 
       {/* ── Loading skeleton ──────────────────────────────────── */}
       {loading && (
@@ -158,8 +162,13 @@ const HomePage = () => {
       {/* ── Product grid ──────────────────────────────────────── */}
       {!loading && products.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {products.map(p => (
-            <ProductCard key={p._id} product={p} onAddToCart={handleAddToCart} />
+          {products.map((p, index) => (
+            <ProductCard
+              key={p._id}
+              product={p}
+              onAddToCart={handleAddToCart}
+              isLcpPriority={index === 0}
+            />
           ))}
         </div>
       )}
